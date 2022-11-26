@@ -3,17 +3,20 @@ import torch.nn as nn
 
 class PlayNet(nn.Module):
 
-    def __init__(self, input_size = 2*334 ,num_actions = 60):
+    def __init__(self, current_round, single_obs_space, action_space):
         super().__init__()
                  
+        self.input_size = current_round * single_obs_space    
+             
         self.fc = nn.Sequential(
-              nn.Linear(input_size,256),
+              nn.Linear(self.input_size,256),
               nn.ReLU(),
-              nn.Linear(256, num_actions),
+              nn.Linear(256, action_space),
               nn.Softmax(dim=-1)
           )
 
     def forward(self, x):
+        x = torch.from_numpy(x)
         x = torch.flatten(x)
         if torch.cuda.is_available():
             x = torch.tensor(x, dtype=torch.float).cuda()

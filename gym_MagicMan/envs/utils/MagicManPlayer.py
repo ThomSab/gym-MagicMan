@@ -1,10 +1,7 @@
 import numpy as np
-import os
-import sys
-import json
-import random
-import MagicManDeck as deck
 import torch
+import random
+
 
 
 #______________________________________________________________________________

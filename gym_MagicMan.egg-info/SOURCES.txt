@@ -1,0 +1,7 @@
+README.md
+setup.py
+gym_MagicMan.egg-info/PKG-INFO
+gym_MagicMan.egg-info/SOURCES.txt
+gym_MagicMan.egg-info/dependency_links.txt
+gym_MagicMan.egg-info/requires.txt
+gym_MagicMan.egg-info/top_level.txt
