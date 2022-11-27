@@ -11,8 +11,7 @@ class PlayNet(nn.Module):
         self.fc = nn.Sequential(
               nn.Linear(self.input_size,256),
               nn.ReLU(),
-              nn.Linear(256, action_space),
-              nn.Softmax(dim=-1)
+              nn.Linear(256, action_space)
           )
 
     def forward(self, x):

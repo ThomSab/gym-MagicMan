@@ -1,6 +1,7 @@
 import gym
 from gym import error, spaces, utils
 from gym.utils import seeding
+from gym.spaces import Dict,Box
 
 import numpy as np
 import torch
@@ -15,24 +16,16 @@ import gym_MagicMan.envs.utils.MagicManDeck as deck
 class MagicManEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
-    def __init__(self,init_state=None,adversaries='random',current_round=15):
+    def __init__(self,init_state=None,adversaries='random',verbose=False,verbose_obs=False,current_round=15):
+        
+        
         if not init_state:
         
+            self.verbose = verbose
+            self.verbose_obs= verbose_obs
+        
             self.single_obs_space=334
-            self.observation_space = gym.spaces.Box(
-                                         low=np.zeros(current_round*self.single_obs_space), 
-                                         high=np.full((current_round*self.single_obs_space,),1),
-                                         dtype=np.float32
-                                         )
-
-        
-            self.action_space = gym.spaces.Box(
-                                         low=np.zeros(len(deck.deck)), 
-                                         high=np.full(len(deck.deck),1),
-                                         dtype=np.float32
-                                         )
-            #space would preferrably be a dictionary but thats a later-problem
-        
+            
             self.round_deck = []
             self.players = []
             
@@ -63,19 +56,75 @@ class MagicManEnv(gym.Env):
             self.current_suit = torch.zeros(6)
             self.all_bid_completion = torch.zeros(self.n_players)
             
+            
+            self.observation_space = Box(
+                                         low=np.zeros(current_round*self.single_obs_space), 
+                                         high=np.full((current_round*self.single_obs_space,),1),
+                                         dtype=np.float32
+                                         )
+
+            self.observation_space = Dict({_: Dict({"norm_bids":Box(low=np.full((self.n_players),-4),
+                                                                    high=np.full((self.n_players),4),
+                                                                   dtype=np.float32
+                                                                   ), #is done by "manual" normalization --> replace with torch function?
+                                           "all_bid_completion":Box(low=np.full((self.n_players),-1),
+                                                                    high=np.full((self.n_players),1),
+                                                                dtype=np.float32
+                                                                ), #is done by tanh
+                                           "player_idx":Box(low=np.full((self.n_players),0),
+                                                            high=np.full((self.n_players),1),
+                                                        dtype=np.float32
+                                                        ), #sparse
+                                           "player_self_bid_completion":Box(low=np.full((1),-1),
+                                                                            high=np.full((1),1),
+                                                                            dtype=np.float32
+                                                                            ), #is done by tanh,
+                                            #this information will be passed twice - once in an array of all players and once for self 
+                                            #might be a problem because its biasing the decision
+                                            #the agent will be told that there is another player with the exact same bid completion as him?
+                                            #might also just not be a problem who knows
+                                           "n_cards":Box(low=np.full((self.max_rounds),0),
+                                                         high=np.full((self.max_rounds),1),
+                                                     dtype=np.float32
+                                                     ),#sparse
+                                           "played_cards":Box(low=np.full((self.n_players,60),0),
+                                                              high=np.full((self.n_players,60),1),
+                                                          dtype=np.float32
+                                                          ),#sparse
+                                           "cards_tensor":Box(low=np.full((60),0),
+                                                              high=np.full((60),1),
+                                                          dtype=np.float32
+                                                          ),#sparse
+                                           "current_suit":Box(low=np.full((6),0),
+                                                              high=np.full((6),1),
+                                                          dtype=np.float32
+                                                          )#sparse
+                                          })
+                                          for _ in range(self.current_round)})
+            
+            self.flat_obs_space = gym.spaces.utils.flatten_space(self.observation_space)
+        
+            self.action_space = Box(
+                                         low=np.full(len(deck.deck),-1), 
+                                         high=np.full(len(deck.deck),1),
+                                         dtype=np.float32
+                                         )
+        
+            
              
             #Observation Variables:
-            self.turn_obs_size = 334
             
             self.bid_obs = None
-            print("Bids are predetermined in this environment.")
+            print("Bids are predetermined in this environment. --> see 'active bid' flag")
             print("Bid input is not ordered. Has to be implemented in the future.")
-            self.turn_obs = None
             self.r = 0
             self.info = {}
             self.done = False
             
             self.reset()
+    
+    def get_flat(self,obs_dict):
+        return gym.spaces.flatten(self.observation_space,obs_dict)
     
     def reset(self):
         self.round_deck = []
@@ -89,7 +138,6 @@ class MagicManEnv(gym.Env):
         self.all_bid_completion = torch.zeros(self.n_players)
         
         self.bid_obs = None
-        self.turn_obs = None
         self.r = 0
         self.info = {}
         self.done = False
@@ -98,9 +146,16 @@ class MagicManEnv(gym.Env):
             player.round_suits = 0
             player.game_score = 0
             player.cards_obj = []
-            player.cards_tensor = torch.zeros(self.max_rounds)
-            player.round_obs = torch.zeros(self.current_round,self.turn_obs_size)
-           
+            player.round_obs = {_:{"norm_bids"                  : torch.zeros(self.n_players),
+                                   "all_bid_completion"         : torch.zeros(self.n_players),
+                                   "player_idx"                 : torch.zeros(self.n_players),
+                                   "player_self_bid_completion" : torch.zeros(1),
+                                   "n_cards"                    : torch.zeros(self.max_rounds),
+                                   "played_cards"               : torch.zeros((self.n_players,60)),
+                                   "cards_tensor"               : torch.zeros(60),
+                                   "current_suit"               : torch.zeros(6),
+                                   } for _ in range(self.n_players)}
+       
         obs,r,done,info = self.init_bid_step()
         
         
@@ -119,22 +174,25 @@ class MagicManEnv(gym.Env):
         self.turn_idx = 0
         self.current_suit_idx = 5
         self.current_suit = torch.zeros(6)
-        self.turn_obs ,self.r, self.done, self.info = self.step(action = None)
-        return self.turn_obs, self.r, self.done, self.info
+        flat_round_obs ,self.r, self.done, self.info = self.step(action = None)
+        return flat_round_obs, self.r, self.done, self.info
             
     def step(self,action): #!!not round
         
         if action is not None:
-        
             if type(action)==np.ndarray:
                 action=torch.from_numpy(action)
-            valid_action_dist = action*self.train_player.cards_tensor
+            if self.verbose:
+                print(f"Train Player action: {action}\nTrain Player hand: {self.train_player.cards_obj}")
+            action_prob_distribution = torch.nn.functional.softmax(action,dim=-1)+1e-5
+            valid_action_dist = action_prob_distribution*self.train_player.turn_obs["cards_tensor"]
             action = torch.argmax(valid_action_dist)
             played_card = deck.deck[action]
             self.turn_cards.append(played_card)
             self.train_player.cards_obj.remove(played_card)
             self.r,self.info = 0,{}
             self.turnorder_idx +=1
+            
         if action is None:
             assert self.turnorder_idx==0, f"The turn index is {self.turnorder_idx} | Should be 0."
         
@@ -146,52 +204,42 @@ class MagicManEnv(gym.Env):
         while True: #returns when necessary
             if not self.turnorder_idx == (self.n_players):
                 #____________________________________________________
-                #card playing
-                
+                #collecting observation
                 player = self.players[self.turnorder_idx] #pls do not be a deep copy
                 
-                player_idx = torch.zeros(self.n_players)
-                player_idx[self.turnorder_idx] = 1
+                player.turn_obs = {"norm_bids"                  : norm_bids,
+                                   "all_bid_completion"         : self.all_bid_completion,
+                                   "player_idx"                 : torch.zeros(self.n_players),
+                                   "player_self_bid_completion" : torch.zeros(1),
+                                   "n_cards"                    : torch.zeros(self.max_rounds),
+                                   "played_cards"               : torch.zeros((self.n_players,60)),
+                                   "cards_tensor"               : torch.zeros(60),
+                                   "current_suit"               : torch.zeros(6),
+                                   }
                 
+                player.turn_obs["player_idx"][self.turnorder_idx] = 1
+                                
                 player_self_bid_completion = torch.tanh(torch.tensor(player.round_suits-player.current_bid))
-                player_self_bid_completion = torch.unsqueeze(player_self_bid_completion,0)
-                #this will be passed twice - once in an array of all players and once for self 
-                #might be a problem because its biasing the decision
-                #the agent will be told that there is another player with the exact same bid completion as him?
-                #might also just not be a problem who knows
-                        
-                    
-                n_cards = torch.zeros(self.max_rounds)
-                n_cards[int(player.cards_tensor.sum()-1)] = 1 #how many cards there are in his hand
+                player.turn_obs["player_self_bid_completion"]=torch.unsqueeze(player_self_bid_completion,0)
+               
+                
+                player.turn_obs["n_cards"][len(player.cards_obj)-1] = 1 #how many cards there are in his hand
 
                 self.current_suit = torch.zeros(6)
-                self.current_suit_idx = deck.legal(self.turn_cards,player.cards_obj,self.trump)
-                self.current_suit[self.current_suit_idx] = 1
-
-                played_cards = torch.zeros(self.n_players,60)
-                for card_idx in range(len(self.turn_cards)):
-                    played_card = self.turn_cards[card_idx]
-                    played_cards[card_idx][deck.deck.index(played_card)] = 1
-                    
-                played_cards = torch.flatten(played_cards)                
+                current_suit_idx = deck.legal(self.turn_cards,player.cards_obj,self.trump)
+                self.current_suit[current_suit_idx] = 1
+                player.turn_obs["current_suit"]=self.current_suit
                 
-                player.cards_tensor = torch.zeros(60)
                 for card in player.cards_obj:
                     if card.legal:
-                        player.cards_tensor[deck.deck.index(card)] = 1
+                        player.turn_obs["cards_tensor"][deck.deck.index(card)] = 1
 
-
-                player_turn_obs = torch.cat((norm_bids,
-                                        self.all_bid_completion,
-                                        player_idx,
-                                        player_self_bid_completion,
-                                        n_cards,
-                                        played_cards,
-                                        player.cards_tensor,
-                                        self.current_suit),dim=0)
+                for card_idx in range(len(self.turn_cards)):
+                    played_card = self.turn_cards[card_idx]
+                    player.turn_obs["played_cards"][card_idx][deck.deck.index(played_card)] = 1
                 
-                player.round_obs[self.turn_idx] = player_turn_obs #incomplete information to be completed at the end of turn
-                player_obs = player.round_obs.flatten()
+                player.round_obs[self.turn_idx] = player.turn_obs #incomplete information to be completed at the end of turn
+                player_obs = player.round_obs
                 
                 """
                 Each player might have a different stack of observations
@@ -201,20 +249,27 @@ class MagicManEnv(gym.Env):
 
                 
                 if isinstance(player,AdversaryPlayer):
+                    if self.verbose_obs:
+                        print(f"Adverse Player Observation: {player_obs}")
                     #action is input not output!!!
-                    net_out = player.play(player_obs.numpy())
-                    card_activation = player.cards_tensor*net_out
+                    net_out = player.play(self.get_flat(player_obs))
+                    action_prob_distribution = torch.nn.functional.softmax(net_out,dim=-1)+1e-5
+                    card_activation = player.turn_obs["cards_tensor"]*action_prob_distribution
                     action_idx = torch.argmax(card_activation)
-                        
+                    
                     played_card = deck.deck[action_idx]
+                    if self.verbose:
+                        print(f"Adv Intended Card: {played_card}\nAdv Player Hand: {player.cards_obj}")
 
                     player.cards_obj.remove(played_card)
                     self.turn_cards.append(played_card)
                     self.turnorder_idx +=1
                     
                 elif isinstance(player,TrainPlayer):
-                    self.turn_obs = player_obs
-                    return self.turn_obs.numpy(), self.r, self.done, self.info
+                    if self.verbose_obs:
+                        print(f"Train Player Observation: {player_obs}")
+                    dict_round_obs = player_obs
+                    return dict_round_obs, self.r, self.done, self.info
                     
                 else:
                     raise UserWarning (f"Player is {type(player)} not instance of either AdversaryPlayer or TrainPlayer")            
@@ -244,43 +299,51 @@ class MagicManEnv(gym.Env):
     def compute_final_turn_observations(self):
         
         expected_bid_mean = self.current_round/self.n_players
-        norm_bids = (self.bids-expected_bid_mean)/(self.bids.std()+1e-5)
+        norm_bids = (self.bids-expected_bid_mean)/(self.bids.std())
         if not self.bids.all():
             norm_bids = torch.full(tuple([self.n_players]),float(round(self.current_round/self.n_players)))
             
         for player_idx,player in enumerate(self.players):
-        
-            player_idx_tensor = torch.zeros(self.n_players)
-            player_idx_tensor[player_idx] = 1
-            
+                
+            player.turn_obs = {"norm_bids"                  : norm_bids,
+                               "all_bid_completion"         : self.all_bid_completion,
+                               "player_idx"                 : torch.zeros(self.n_players),
+                               "player_self_bid_completion" : torch.zeros(1),
+                               "n_cards"                    : torch.zeros(self.max_rounds),
+                               "played_cards"               : torch.zeros((self.n_players,60)),
+                               "cards_tensor"               : torch.zeros(60),
+                               "current_suit"               : torch.zeros(6),
+                               }
+                
+            player.turn_obs["player_idx"][player_idx] = 1
+                                
             player_self_bid_completion = torch.tanh(torch.tensor(player.round_suits-player.current_bid))
-            player_self_bid_completion = torch.unsqueeze(player_self_bid_completion,0)
+            player.turn_obs["player_self_bid_completion"]=torch.unsqueeze(player_self_bid_completion,0)
+                
+
+            player.turn_obs["n_cards"][len(player.cards_obj)-1] = 1 #how many cards there are in his hand
+
+            self.current_suit = torch.zeros(6)
+            current_suit_idx = deck.legal(self.turn_cards,player.cards_obj,self.trump)
+            self.current_suit[current_suit_idx] = 1
+            player.turn_obs["current_suit"]=self.current_suit
             
-            n_cards = torch.zeros(self.max_rounds)
-            n_cards[int(player.cards_tensor.sum()-1)] = 1 #how many cards there are in his hand
+            for card in player.cards_obj:
+                if card.legal:
+                    player.turn_obs["cards_tensor"][deck.deck.index(card)] = 1
             
-            played_cards = torch.zeros(self.n_players,60)
+
             for card_idx in range(len(self.turn_cards)):
                 played_card = self.turn_cards[card_idx]
-                played_cards[card_idx][deck.deck.index(played_card)] = 1
+                player.turn_obs["played_cards"][card_idx][deck.deck.index(played_card)] = 1
             
-            played_cards = torch.flatten(played_cards) 
+            player.round_obs[self.turn_idx] = player.turn_obs 
             
-            player_turn_obs = torch.cat((norm_bids,
-                                        self.all_bid_completion,
-                                        player_idx_tensor,
-                                        player_self_bid_completion,
-                                        n_cards,
-                                        played_cards,
-                                        player.cards_tensor,
-                                        self.current_suit),dim=0)
-                        
-            player.round_obs[self.turn_idx] = player_turn_obs
-
+            
+            
     def init_bid_step(self,active_bid=False):
 
         self.state = "BID"
-        
         
         self.round_deck = deck.deck.copy()
         random.shuffle(self.round_deck) 
@@ -300,8 +363,8 @@ class MagicManEnv(gym.Env):
             self.bid_obs, self.r, self.done, self.info = self.bid_step(action=None,active_bid=active_bid)
             return self.bid_obs.numpy(), self.r, self.done, self.info
         else:
-            self.turn_obs, self.r, self.done, self.info = self.bid_step(action=None,active_bid=active_bid)
-            return self.turn_obs, self.r, self.done, self.info
+            obs, self.r, self.done, self.info = self.bid_step(action=None,active_bid=active_bid)
+            return obs, self.r, self.done, self.info
 
 
     def bid_step(self,action,active_bid=False): # !!not turn
@@ -342,6 +405,7 @@ class MagicManEnv(gym.Env):
                 player.current_bid = round(((player.bid(player_obs)*self.current_round)/self.n_players).item())
                 self.bids[self.bid_idx] = player.current_bid
                 self.bid_idx += 1
+
             elif isinstance(player,TrainPlayer):
                 if active_bid:
                     self.bid_obs = player_obs
@@ -354,7 +418,6 @@ class MagicManEnv(gym.Env):
                 raise UserWarning (f"Player is {type(player)} not instance of either AdversaryPlayer or TrainPlayer")
                 
         if self.bid_idx == (self.n_players):
-            
             return self.init_step()
 
 
@@ -376,8 +439,10 @@ class MagicManEnv(gym.Env):
         for player in self.players:
             player.clean_hand() #at this point all hands should be empty anyways
             self.all_bid_completion = torch.zeros(self.n_players)
+            
+        final_obs = self.train_player.round_obs
 
-        return self.turn_obs.numpy(),self.r,self.done,self.info
+        return final_obs,self.r,self.done,self.info
 
 
 
