@@ -154,7 +154,7 @@ class MagicManEnv(gym.Env):
                                    "played_cards"               : torch.zeros((self.n_players,60)),
                                    "cards_tensor"               : torch.zeros(60),
                                    "current_suit"               : torch.zeros(6),
-                                   } for _ in range(self.n_players)}
+                                   } for _ in range(self.current_round)}
        
         obs,r,done,info = self.init_bid_step()
         
@@ -196,11 +196,8 @@ class MagicManEnv(gym.Env):
         if action is None:
             assert self.turnorder_idx==0, f"The turn index is {self.turnorder_idx} | Should be 0."
         
-        expected_bid_mean = self.current_round/self.n_players
-        norm_bids = (self.bids-expected_bid_mean)/(self.bids.std()+1e-5)
-        if not self.bids.all():
-            norm_bids = torch.zeros(4)#torch.full(tuple([self.n_players]),float(round(self.current_round/self.n_players)))
-        
+        norm_bids = self.bids/self.current_round
+
         while True: #returns when necessary
             if not self.turnorder_idx == (self.n_players):
                 #____________________________________________________
@@ -238,6 +235,7 @@ class MagicManEnv(gym.Env):
                     played_card = self.turn_cards[card_idx]
                     player.turn_obs["played_cards"][card_idx][deck.deck.index(played_card)] = 1
                 
+                assert self.turn_idx<self.current_round,f"Turn index is {self.turn_idx}, Round is {self.current_round}"
                 player.round_obs[self.turn_idx] = player.turn_obs #incomplete information to be completed at the end of turn
                 player_obs = player.round_obs
                 
@@ -298,10 +296,7 @@ class MagicManEnv(gym.Env):
 
     def compute_final_turn_observations(self):
         
-        expected_bid_mean = self.current_round/self.n_players
-        norm_bids = (self.bids-expected_bid_mean)/(self.bids.std())
-        if not self.bids.all():
-            norm_bids = torch.full(tuple([self.n_players]),float(round(self.current_round/self.n_players)))
+        norm_bids = self.bids/self.current_round
             
         for player_idx,player in enumerate(self.players):
                 
@@ -391,10 +386,8 @@ class MagicManEnv(gym.Env):
             #if self.players.index(player) ==  3
             #    last_player_bool[0] = 1
             
-            norm_bids = (self.bids-self.bids.mean())/(self.bids.std()+1e-5)
-            if not self.bids.all():
-                norm_bids = torch.zeros(self.n_players)#torch.full(tuple([self.n_players]),float(round(self.current_round/self.n_players)))
-            
+            norm_bids = self.bids/self.current_round
+
             player_obs = torch.cat((norm_bids,
                                     player_idx,
                                     n_cards,
