@@ -20,7 +20,7 @@ os.chdir(r'C:\Users\jaspe\Documents\UNI\Sem_III\SEMINAR\gym-MagicMan')
 config={"policy_type": "MlpPolicy",
         "learning_rate":1e-4,
        "batch_size":64,
-       "total_timesteps":100_000,
+       "total_timesteps":1_000_000,
        "env_name": "MagicMan-v0",
        "current_round": 2}
 
