@@ -123,7 +123,7 @@ class MagicManEnv(gym.Env):
         self.reset()
     
     def get_flat(self,obs_dict):
-        return gym.spaces.flatten(self.observation_space,obs_dict).to(device)
+        return torch.from_numpy(gym.spaces.flatten(self.observation_space,obs_dict)).to(device)
     
     def reset(self):
         self.round_deck = []
