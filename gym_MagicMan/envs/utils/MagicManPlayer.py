@@ -10,12 +10,13 @@ import random
 class AdversaryPlayer:
 
 
-    def __init__(self,play_network,bid_network):
+    def __init__(self,play_network=None):
         
         self.name = "AdversaryPlayer"+str(random.randint(111111,999999))
         
-        self.play_network = play_network
-        self.bid_network = bid_network
+        self.play_network = None
+        if play_network:
+            self.play_network = play_network
         
         self.round_score = 0
         self.game_score  = 0
@@ -25,7 +26,10 @@ class AdversaryPlayer:
        
        
     def play (self,obs):
-        action_distribution = self.play_network(obs)
+        if self.play_network:
+            action_distribution = self.play_network(obs)
+        else:
+            action_distribution = torch.rand((60))
         return action_distribution
     
     def bid (self,obs):

@@ -29,14 +29,7 @@ class MagicManEnv(gym.Env):
         self.players = []
         
         if adversaries=='random':
-            self.players = [AdversaryPlayer(
-                                        net.PlayNet(
-                                            current_round=current_round,
-                                            single_obs_space=self.single_obs_space,
-                                            action_space=len(deck.deck)
-                                        )
-                                        ,net.BidNet()
-                            ) for _ in range(3)]
+            self.players = [AdversaryPlayer() for _ in range(3)]
         
         self.train_player = TrainPlayer()
         self.players.append(self.train_player)
@@ -54,13 +47,6 @@ class MagicManEnv(gym.Env):
         self.current_suit_idx = 5
         self.current_suit = torch.zeros(6)
         self.all_bid_completion = torch.zeros(self.n_players)
-        
-        
-        self.observation_space = Box(
-                                     low=np.zeros(current_round*self.single_obs_space), 
-                                     high=np.full((current_round*self.single_obs_space,),1),
-                                     dtype=np.float32
-                                     )
 
         self.observation_space = Dict({_: Dict({"norm_bids":Box(low=np.full((self.n_players),-4),
                                                                 high=np.full((self.n_players),4),
