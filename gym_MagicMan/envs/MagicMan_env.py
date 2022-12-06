@@ -18,113 +18,112 @@ class MagicManEnv(gym.Env):
 
     def __init__(self,init_state=None,adversaries='random',verbose=False,verbose_obs=False,current_round=15):
         
+        device = 'cuda' if torch.cuda.is_available() else 'cpu'        
         
-        if not init_state:
+        self.verbose = verbose
+        self.verbose_obs= verbose_obs
+    
+        self.single_obs_space=334
         
-            self.verbose = verbose
-            self.verbose_obs= verbose_obs
+        self.round_deck = []
+        self.players = []
         
-            self.single_obs_space=334
-            
-            self.round_deck = []
-            self.players = []
-            
-            if adversaries=='random':
-                self.players = [AdversaryPlayer(
-                                            net.PlayNet(
-                                                current_round=current_round,
-                                                single_obs_space=self.single_obs_space,
-                                                action_space=len(deck.deck)
-                                            )
-                                            ,net.BidNet()
-                                ) for _ in range(3)]
-            
-            self.train_player = TrainPlayer()
-            self.players.append(self.train_player)
-            self.noorder_players = self.players #pls dont be a deep copy
-            self.n_players = len(self.players)
-            self.max_rounds = int(60/self.n_players)
-            self.current_round = current_round
-            self.bids = torch.zeros(self.n_players)#torch.full(tuple([self.n_players]),float(round(self.current_round/self.n_players)))
-            self.trump = 0 #trump is red every time so the bots have a better time learning
-            random.shuffle(self.players)
-            self.players = deque(self.players) #pick from a list of players
-            self.turnorder_idx = 0
-            self.bid_idx = 0
-            self.turn_cards = []
-            self.current_suit_idx = 5
-            self.current_suit = torch.zeros(6)
-            self.all_bid_completion = torch.zeros(self.n_players)
-            
-            
-            self.observation_space = Box(
-                                         low=np.zeros(current_round*self.single_obs_space), 
-                                         high=np.full((current_round*self.single_obs_space,),1),
-                                         dtype=np.float32
-                                         )
+        if adversaries=='random':
+            self.players = [AdversaryPlayer(
+                                        net.PlayNet(
+                                            current_round=current_round,
+                                            single_obs_space=self.single_obs_space,
+                                            action_space=len(deck.deck)
+                                        )
+                                        ,net.BidNet()
+                            ) for _ in range(3)]
+        
+        self.train_player = TrainPlayer()
+        self.players.append(self.train_player)
+        self.noorder_players = self.players #pls dont be a deep copy
+        self.n_players = len(self.players)
+        self.max_rounds = int(60/self.n_players)
+        self.current_round = current_round
+        self.bids = torch.zeros(self.n_players)#torch.full(tuple([self.n_players]),float(round(self.current_round/self.n_players)))
+        self.trump = 0 #trump is red every time so the bots have a better time learning
+        random.shuffle(self.players)
+        self.players = deque(self.players) #pick from a list of players
+        self.turnorder_idx = 0
+        self.bid_idx = 0
+        self.turn_cards = []
+        self.current_suit_idx = 5
+        self.current_suit = torch.zeros(6)
+        self.all_bid_completion = torch.zeros(self.n_players)
+        
+        
+        self.observation_space = Box(
+                                     low=np.zeros(current_round*self.single_obs_space), 
+                                     high=np.full((current_round*self.single_obs_space,),1),
+                                     dtype=np.float32
+                                     )
 
-            self.observation_space = Dict({_: Dict({"norm_bids":Box(low=np.full((self.n_players),-4),
-                                                                    high=np.full((self.n_players),4),
-                                                                   dtype=np.float32
-                                                                   ), #is done by "manual" normalization --> replace with torch function?
-                                           "all_bid_completion":Box(low=np.full((self.n_players),-1),
-                                                                    high=np.full((self.n_players),1),
-                                                                dtype=np.float32
-                                                                ), #is done by tanh
-                                           "player_idx":Box(low=np.full((self.n_players),0),
-                                                            high=np.full((self.n_players),1),
-                                                        dtype=np.float32
-                                                        ), #sparse
-                                           "player_self_bid_completion":Box(low=np.full((1),-1),
-                                                                            high=np.full((1),1),
-                                                                            dtype=np.float32
-                                                                            ), #is done by tanh,
-                                            #this information will be passed twice - once in an array of all players and once for self 
-                                            #might be a problem because its biasing the decision
-                                            #the agent will be told that there is another player with the exact same bid completion as him?
-                                            #might also just not be a problem who knows
-                                           "n_cards":Box(low=np.full((self.max_rounds),0),
-                                                         high=np.full((self.max_rounds),1),
-                                                     dtype=np.float32
-                                                     ),#sparse
-                                           "played_cards":Box(low=np.full((self.n_players,60),0),
-                                                              high=np.full((self.n_players,60),1),
-                                                          dtype=np.float32
-                                                          ),#sparse
-                                           "cards_tensor":Box(low=np.full((60),0),
-                                                              high=np.full((60),1),
-                                                          dtype=np.float32
-                                                          ),#sparse
-                                           "current_suit":Box(low=np.full((6),0),
-                                                              high=np.full((6),1),
-                                                          dtype=np.float32
-                                                          )#sparse
-                                          })
-                                          for _ in range(self.current_round)})
-            
-            self.flat_obs_space = gym.spaces.utils.flatten_space(self.observation_space)
+        self.observation_space = Dict({_: Dict({"norm_bids":Box(low=np.full((self.n_players),-4),
+                                                                high=np.full((self.n_players),4),
+                                                               dtype=np.float32
+                                                               ), #is done by "manual" normalization --> replace with torch function?
+                                       "all_bid_completion":Box(low=np.full((self.n_players),-1),
+                                                                high=np.full((self.n_players),1),
+                                                            dtype=np.float32
+                                                            ), #is done by tanh
+                                       "player_idx":Box(low=np.full((self.n_players),0),
+                                                        high=np.full((self.n_players),1),
+                                                    dtype=np.float32
+                                                    ), #sparse
+                                       "player_self_bid_completion":Box(low=np.full((1),-1),
+                                                                        high=np.full((1),1),
+                                                                        dtype=np.float32
+                                                                        ), #is done by tanh,
+                                        #this information will be passed twice - once in an array of all players and once for self 
+                                        #might be a problem because its biasing the decision
+                                        #the agent will be told that there is another player with the exact same bid completion as him?
+                                        #might also just not be a problem who knows
+                                       "n_cards":Box(low=np.full((self.max_rounds),0),
+                                                     high=np.full((self.max_rounds),1),
+                                                 dtype=np.float32
+                                                 ),#sparse
+                                       "played_cards":Box(low=np.full((self.n_players,60),0),
+                                                          high=np.full((self.n_players,60),1),
+                                                      dtype=np.float32
+                                                      ),#sparse
+                                       "cards_tensor":Box(low=np.full((60),0),
+                                                          high=np.full((60),1),
+                                                      dtype=np.float32
+                                                      ),#sparse
+                                       "current_suit":Box(low=np.full((6),0),
+                                                          high=np.full((6),1),
+                                                      dtype=np.float32
+                                                      )#sparse
+                                      })
+                                      for _ in range(self.current_round)})
         
-            self.action_space = Box(
-                                         low=np.full(len(deck.deck),-1), 
-                                         high=np.full(len(deck.deck),1),
-                                         dtype=np.float32
-                                         )
+        self.flat_obs_space = gym.spaces.utils.flatten_space(self.observation_space)
+    
+        self.action_space = Box(
+                                     low=np.full(len(deck.deck),-1), 
+                                     high=np.full(len(deck.deck),1),
+                                     dtype=np.float32
+                                     )
+    
         
-            
-             
-            #Observation Variables:
-            
-            self.bid_obs = None
-            print("Bids are predetermined in this environment. --> see 'active bid' flag")
-            print("Bid input is not ordered. Has to be implemented in the future.")
-            self.r = 0
-            self.info = {}
-            self.done = False
-            
-            self.reset()
+         
+        #Observation Variables:
+        
+        self.bid_obs = None
+        print("Bids are predetermined in this environment. --> see 'active bid' flag")
+        print("Bid input is not ordered. Has to be implemented in the future.")
+        self.r = 0
+        self.info = {}
+        self.done = False
+        
+        self.reset()
     
     def get_flat(self,obs_dict):
-        return gym.spaces.flatten(self.observation_space,obs_dict)
+        return gym.spaces.flatten(self.observation_space,obs_dict).to(device)
     
     def reset(self):
         self.round_deck = []
