@@ -395,7 +395,7 @@ class MagicManEnv(gym.Env):
                                     torch.tensor([self.current_round])),dim=0)
             
             if isinstance(player,AdversaryPlayer):
-                player.current_bid = round(((player.bid(player_obs)*self.current_round)/self.n_players).item())
+                player.current_bid = round(self.current_round/self.n_players)
                 self.bids[self.bid_idx] = player.current_bid
                 self.bid_idx += 1
 
