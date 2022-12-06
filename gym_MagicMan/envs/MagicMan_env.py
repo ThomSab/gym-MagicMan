@@ -18,7 +18,7 @@ class MagicManEnv(gym.Env):
 
     def __init__(self,init_state=None,adversaries='random',verbose=False,verbose_obs=False,current_round=15):
         
-        device = 'cuda' if torch.cuda.is_available() else 'cpu'        
+        self.device = 'cuda' if torch.cuda.is_available() else 'cpu'        
         
         self.verbose = verbose
         self.verbose_obs= verbose_obs
@@ -123,7 +123,7 @@ class MagicManEnv(gym.Env):
         self.reset()
     
     def get_flat(self,obs_dict):
-        return torch.from_numpy(gym.spaces.flatten(self.observation_space,obs_dict)).to(device)
+        return torch.from_numpy(gym.spaces.flatten(self.observation_space,obs_dict)).to(self.device)
     
     def reset(self):
         self.round_deck = []
