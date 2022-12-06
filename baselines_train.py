@@ -14,6 +14,9 @@ from stable_baselines3.common.logger import configure
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import DummyVecEnv
 
+from sb3_contrib.common.wrappers import ActionMasker
+from sb3_contrib.ppo_mask import MaskablePPO
+
 os.chdir(r'C:\Users\jasper\Documents\LINZ\Semester_III\SEMINAR\gym-MagicMan')
 
 
@@ -25,7 +28,7 @@ config={"policy_type": "MlpPolicy",
        "current_round": 2}
 
 
-experiment_name = f"PPO_{int(time.time())}"
+experiment_name = f"Masked_PPO_{int(time.time())}"
 wandb.init(
         name=experiment_name,
         project="MagicManGym",
@@ -36,14 +39,17 @@ wandb.init(
 )
 
 def make_env():
-    env = gym.make(config["env_name"],current_round=config["current_round"])#,current_round=2,verbose=0,verbose_obs=0)
+    env = gym.make(config["env_name"],current_round=config["current_round"],verbose=0)#,verbose_obs=0)
     env = Monitor(env)
     env = gym.wrappers.FlattenObservation(env)
     return env
 
+def mask_fn(env: gym.Env) -> torch.Tensor:
+    return env.action_mask
 
-env = DummyVecEnv([make_env])
-model = PPO(config["policy_type"], env, verbose=1 ,learning_rate=config["learning_rate"],tensorboard_log=f"runs/{experiment_name}")#,batch_size=config["batch_size"])
+env = make_env()
+env = ActionMasker(env, mask_fn)
+model = MaskablePPO(config["policy_type"], env, verbose=1 ,learning_rate=config["learning_rate"],tensorboard_log=f"runs/{experiment_name}")#,batch_size=config["batch_size"])
 
 """
     params = model.get_parameters()
@@ -57,5 +63,3 @@ model.learn(total_timesteps=config["total_timesteps"],
                                    verbose=2,
                                    model_save_freq=1_000_000,
                                    model_save_path=f"models/{experiment_name}",))
-
-

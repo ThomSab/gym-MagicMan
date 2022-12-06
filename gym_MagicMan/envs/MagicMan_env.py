@@ -1,7 +1,7 @@
 import gym
 from gym import error, spaces, utils
 from gym.utils import seeding
-from gym.spaces import Dict,Box
+from gym.spaces import Dict,Box,Discrete
 
 import numpy as np
 import torch
@@ -76,7 +76,7 @@ class MagicManEnv(gym.Env):
                                                           high=np.full((self.n_players,60),1),
                                                       dtype=np.float32
                                                       ),#sparse
-                                       "cards_tensor":Box(low=np.full((60),0),
+                                       "legal_cards_tensor":Box(low=np.full((60),0),
                                                           high=np.full((60),1),
                                                       dtype=np.float32
                                                       ),#sparse
@@ -89,11 +89,8 @@ class MagicManEnv(gym.Env):
         
         self.flat_obs_space = gym.spaces.utils.flatten_space(self.observation_space)
     
-        self.action_space = Box(
-                                     low=np.full(len(deck.deck),-1), 
-                                     high=np.full(len(deck.deck),1),
-                                     dtype=np.float32
-                                     )
+        self.action_space = Discrete(60)
+        self.action_mask = torch.zeros(60)
     
         
          
@@ -137,7 +134,7 @@ class MagicManEnv(gym.Env):
                                    "player_self_bid_completion" : torch.zeros(1),
                                    "n_cards"                    : torch.zeros(self.max_rounds),
                                    "played_cards"               : torch.zeros((self.n_players,60)),
-                                   "cards_tensor"               : torch.zeros(60),
+                                   "legal_cards_tensor"               : torch.zeros(60),
                                    "current_suit"               : torch.zeros(6),
                                    } for _ in range(self.current_round)}
        
@@ -168,10 +165,8 @@ class MagicManEnv(gym.Env):
             if type(action)==np.ndarray:
                 action=torch.from_numpy(action)
             if self.verbose:
-                print(f"Train Player action: {action}\nTrain Player hand: {self.train_player.cards_obj}")
-            action_prob_distribution = torch.nn.functional.softmax(action,dim=-1)+1e-5
-            valid_action_dist = action_prob_distribution*self.train_player.turn_obs["cards_tensor"]
-            action = torch.argmax(valid_action_dist)
+                print(f"Train Player action mask: {self.action_mask}")
+                print(f"Train Player action: {deck.deck[action]}\nTrain Player hand: {self.train_player.cards_obj}")
             played_card = deck.deck[action]
             self.turn_cards.append(played_card)
             self.train_player.cards_obj.remove(played_card)
@@ -195,7 +190,7 @@ class MagicManEnv(gym.Env):
                                    "player_self_bid_completion" : torch.zeros(1),
                                    "n_cards"                    : torch.zeros(self.max_rounds),
                                    "played_cards"               : torch.zeros((self.n_players,60)),
-                                   "cards_tensor"               : torch.zeros(60),
+                                   "legal_cards_tensor"         : torch.zeros(60),
                                    "current_suit"               : torch.zeros(6),
                                    }
                 
@@ -214,7 +209,11 @@ class MagicManEnv(gym.Env):
                 
                 for card in player.cards_obj:
                     if card.legal:
-                        player.turn_obs["cards_tensor"][deck.deck.index(card)] = 1
+                        player.turn_obs["legal_cards_tensor"][deck.deck.index(card)] = 1
+                        
+                self.action_mask=player.turn_obs["legal_cards_tensor"]
+                assert sum(self.action_mask)>0 or not player.cards_obj, f"{player} has no valid moves: {player.cards_obj}"
+
 
                 for card_idx in range(len(self.turn_cards)):
                     played_card = self.turn_cards[card_idx]
@@ -235,10 +234,8 @@ class MagicManEnv(gym.Env):
                     if self.verbose_obs:
                         print(f"Adverse Player Observation: {player_obs}")
                     #action is input not output!!!
-                    net_out = player.play(self.get_flat(player_obs))
-                    action_prob_distribution = torch.nn.functional.softmax(net_out,dim=-1)+1e-5
-                    card_activation = player.turn_obs["cards_tensor"]*action_prob_distribution
-                    action_idx = torch.argmax(card_activation)
+                    net_out = player.play(self.get_flat(player_obs),self.action_mask)
+                    action_idx = net_out
                     
                     played_card = deck.deck[action_idx]
                     if self.verbose:
@@ -291,7 +288,7 @@ class MagicManEnv(gym.Env):
                                "player_self_bid_completion" : torch.zeros(1),
                                "n_cards"                    : torch.zeros(self.max_rounds),
                                "played_cards"               : torch.zeros((self.n_players,60)),
-                               "cards_tensor"               : torch.zeros(60),
+                               "legal_cards_tensor"               : torch.zeros(60),
                                "current_suit"               : torch.zeros(6),
                                }
                 
@@ -310,8 +307,10 @@ class MagicManEnv(gym.Env):
             
             for card in player.cards_obj:
                 if card.legal:
-                    player.turn_obs["cards_tensor"][deck.deck.index(card)] = 1
+                    player.turn_obs["legal_cards_tensor"][deck.deck.index(card)] = 1
             
+            self.action_mask=player.turn_obs["legal_cards_tensor"]
+            assert sum(self.action_mask)>0 or not player.cards_obj, f"{player} has no valid moves: {player.cards_obj}"
 
             for card_idx in range(len(self.turn_cards)):
                 played_card = self.turn_cards[card_idx]

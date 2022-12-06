@@ -25,12 +25,17 @@ class AdversaryPlayer:
         self.error_string = "empty"
        
        
-    def play (self,obs):
+    def play (self,obs,action_mask):
         if self.play_network:
             action_distribution = self.play_network(obs)
         else:
-            action_distribution = torch.rand((60))
-        return action_distribution
+            action_distribution = torch.rand((60))+1e-5
+            
+        action_distribution = action_distribution*action_mask
+        action_distribution = torch.distributions.Categorical(action_distribution)
+        action = action_distribution.sample()
+        
+        return action
     
     def bid (self,obs):
         activation = self.bid_network(obs)
