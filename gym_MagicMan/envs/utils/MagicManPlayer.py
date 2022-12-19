@@ -8,48 +8,35 @@ import random
 #Player Class constructor
 
 class AdversaryPlayer:
-
-
-    def __init__(self,play_network=None):
-        
+    def __init__(self):
+    
         self.name = "AdversaryPlayer"+str(random.randint(111111,999999))
-        
-        self.play_network = None
-        if play_network:
-            self.play_network = play_network
-        
+    
         self.round_score = 0
         self.game_score  = 0
         self.cards_obj = []
         self.cards_tensor = torch.zeros(60) #one-hot encoded deck
         self.error_string = "empty"
-       
-       
-    def play (self,obs,action_mask):
-        if self.play_network:
-            action_distribution = self.play_network(obs)
-        else:
-            action_distribution = torch.rand((60))+1e-5
+        
+        self.observation_shape ={_:{"norm_bids"                  : torch.zeros(self.n_players),
+                                    "all_bid_completion"         : torch.zeros(self.n_players),
+                                    "player_idx"                 : torch.zeros(self.n_players),
+                                    "player_self_bid_completion" : torch.zeros(1),
+                                    "n_cards"                    : torch.zeros(self.max_rounds),
+                                    "played_cards"               : torch.zeros((self.n_players,60)),
+                                    "legal_cards_tensor"         : torch.zeros(60),
+                                    "current_suit"               : torch.zeros(6),
+                                    } for _ in range(self.current_round)}
+        
+    def __repr__(self):
+        return self.name
+        
+    def get_non_flat(self,flat_obs):
+        assert len(flat_obs.shape)==1, f"Observation should be a 1d vector but is {flat_obs.shape}."
+        
+        #gym utils unflatten
             
-        action_distribution = action_distribution*action_mask
-        action_distribution = torch.distributions.Categorical(action_distribution)
-        action = action_distribution.sample()
-        
-        return action
-    
-    def bid (self,obs):
-        activation = self.bid_network(obs)
-        
-        self.current_activation = activation[0]
-            #multiply by the number of card in hand
-            #then divide by the amount of players 
-            #to have a better starting point for the bots
 
-        
-        return self.current_activation
-
-    def clean_hand(self):
-        self.cards = []  
 
 class TrainPlayer:
     

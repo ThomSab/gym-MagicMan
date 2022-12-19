@@ -8,8 +8,8 @@ import torch
 import random
 from collections import deque
 
-import gym_MagicMan.envs.utils.MagicNet as net
-from gym_MagicMan.envs.utils.MagicManPlayer import AdversaryPlayer, TrainPlayer
+from gym_MagicMan.envs.utils.MagicManPlayer import TrainPlayer
+from gym_MagicMan.envs.utils.MagicManRandomAdversary import RandomAdversary
 import gym_MagicMan.envs.utils.MagicManDeck as deck
 
 
@@ -29,7 +29,7 @@ class MagicManEnv(gym.Env):
         self.players = []
         
         if adversaries=='random':
-            self.players = [AdversaryPlayer() for _ in range(3)]
+            self.players = [RandomAdversary() for _ in range(3)]
         
         self.train_player = TrainPlayer()
         self.players.append(self.train_player)
@@ -134,7 +134,7 @@ class MagicManEnv(gym.Env):
                                    "player_self_bid_completion" : torch.zeros(1),
                                    "n_cards"                    : torch.zeros(self.max_rounds),
                                    "played_cards"               : torch.zeros((self.n_players,60)),
-                                   "legal_cards_tensor"               : torch.zeros(60),
+                                   "legal_cards_tensor"         : torch.zeros(60),
                                    "current_suit"               : torch.zeros(6),
                                    } for _ in range(self.current_round)}
        
@@ -146,7 +146,6 @@ class MagicManEnv(gym.Env):
 
     def render(self, mode='human', close=False):
         raise NotImplementedError
-        
         
     def starting_player(self,starting_player):
         self.players.rotate(  -self.players.index(starting_player) )
@@ -379,7 +378,8 @@ class MagicManEnv(gym.Env):
                                     torch.tensor([self.current_round])),dim=0)
             
             if isinstance(player,AdversaryPlayer):
-                player.current_bid = round(self.current_round/self.n_players)
+                
+                player.current_bid = round(self.current_round*player.bid(player_obs))
                 self.bids[self.bid_idx] = player.current_bid
                 self.bid_idx += 1
 
@@ -427,18 +427,5 @@ class MagicManEnv(gym.Env):
 
 if __name__ == "__main__":
 
-
-    env = MagicManEnv(adversaries='random',current_round = 2)
-    obs = env.reset()
-    external_train_net = net.PlayNet(current_round=env.current_round, single_obs_space=env.single_obs_space, action_space=len(deck.deck))
+    raise UserWarning("Do not execute MagicMan_env. Run environment via gym.")
     
-    done = False
-    
-    
-    while not done:
-        player_action = external_train_net(obs)
-        obs,r,done,info = env.step(player_action)
-        print(r,done)
-    
-
-
