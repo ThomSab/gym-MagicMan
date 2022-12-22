@@ -135,7 +135,14 @@ def net_arr_trans(list_arg,length):#network array transform
 deck.sort(key = lambda x: x.value)
 
 
-
+if __name__ == "__main__":
+    for card in deck:
+        print(card)
+    
+    print(deck[-4:])
+    
+    for red_card in deck[0:][::4][1:-1]:
+        print(red_card)
 
 
 

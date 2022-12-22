@@ -25,16 +25,12 @@ class AdversaryPlayer:
                                     "n_cards"                    : torch.zeros(self.max_rounds),
                                     "played_cards"               : torch.zeros((self.n_players,60)),
                                     "legal_cards_tensor"         : torch.zeros(60),
+                                    "cards_tensor"               : torch.zeros(60),
                                     "current_suit"               : torch.zeros(6),
                                     } for _ in range(self.current_round)}
         
     def __repr__(self):
         return self.name
-        
-    def get_non_flat(self,flat_obs):
-        assert len(flat_obs.shape)==1, f"Observation should be a 1d vector but is {flat_obs.shape}."
-        
-        #gym utils unflatten
             
 
 

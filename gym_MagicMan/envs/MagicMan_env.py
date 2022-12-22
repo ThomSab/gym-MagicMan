@@ -23,7 +23,7 @@ class MagicManEnv(gym.Env):
         self.verbose = verbose
         self.verbose_obs= verbose_obs
     
-        self.single_obs_space=334
+        self.single_obs_space=394
         
         self.round_deck = []
         self.players = []
@@ -77,6 +77,10 @@ class MagicManEnv(gym.Env):
                                                       dtype=np.float32
                                                       ),#sparse
                                        "legal_cards_tensor":Box(low=np.full((60),0),
+                                                          high=np.full((60),1),
+                                                      dtype=np.float32
+                                                      ),#sparse
+                                       "cards_tensor":Box(low=np.full((60),0),
                                                           high=np.full((60),1),
                                                       dtype=np.float32
                                                       ),#sparse
@@ -135,6 +139,7 @@ class MagicManEnv(gym.Env):
                                    "n_cards"                    : torch.zeros(self.max_rounds),
                                    "played_cards"               : torch.zeros((self.n_players,60)),
                                    "legal_cards_tensor"         : torch.zeros(60),
+                                   "cards_tensor"               : torch.zeros(60),
                                    "current_suit"               : torch.zeros(6),
                                    } for _ in range(self.current_round)}
        
@@ -149,7 +154,86 @@ class MagicManEnv(gym.Env):
         
     def starting_player(self,starting_player):
         self.players.rotate(  -self.players.index(starting_player) )
-    
+        
+    def init_bid_step(self,active_bid=False):
+
+        self.state = "BID"
+        
+        self.round_deck = deck.deck.copy()
+        random.shuffle(self.round_deck) 
+        
+        for _ in range(self.current_round):
+            for player in self.noorder_players:
+                player.cards_obj.append(self.round_deck.pop(-1))
+                #pop not only removes the item at index but also returns it
+                
+        self.bids = torch.full(tuple([self.n_players]),float(round(self.current_round/self.n_players)))#bids that are not yet given become 0 (bids are normalized so 0 is the expected bid)
+
+        self.bid_idx = 0
+        self.done = False
+        self.r,self.info = 0,{}
+
+        if active_bid:
+            self.bid_obs, self.r, self.done, self.info = self.bid_step(action=None,active_bid=active_bid)
+            return self.bid_obs.numpy(), self.r, self.done, self.info
+        else:
+            obs, self.r, self.done, self.info = self.bid_step(action=None,active_bid=active_bid)
+            return obs, self.r, self.done, self.info
+            
+            
+    def bid_step(self,action,active_bid=False): # !!not turn
+        
+        if action is not None:
+            self.bids[self.bid_idx] = action
+            self.train_player.current_bid = action
+            self.r,self.info = 0,{}
+            self.bid_idx += 1
+        
+        while self.bid_idx <= (self.n_players-1): # order is relevant
+
+            norm_bids = self.bids/self.current_round
+            
+            player = self.players[self.bid_idx]
+            player.bid_obs = {"norm_bids"                   : norm_bids,
+                               "all_bid_completion"         : self.all_bid_completion,
+                               "player_idx"                 : torch.zeros(self.n_players),
+                               "player_self_bid_completion" : torch.zeros(1),
+                               "n_cards"                    : torch.zeros(self.max_rounds),
+                               "played_cards"               : torch.zeros((self.n_players,60)),
+                               "legal_cards_tensor"         : torch.zeros(60),
+                               "cards_tensor"               : torch.zeros(60),
+                               "current_suit"               : torch.zeros(6),
+                               }
+
+            player.bid_obs["player_idx"][self.bid_idx] = 1
+                                       
+            player.bid_obs["n_cards"][len(player.cards_obj)-1] = 1 #how many cards there are in his hand
+            
+            for card in player.cards_obj:card_idx = deck.deck.index(card)
+                player.turn_obs["cards_tensor"][card_idx] = 1
+                player.turn_obs["legal_cards_tensor"][card_idx] = 1
+
+            if isinstance(player,AdversaryPlayer):
+                
+                player.current_bid = round(self.current_round*player.bid(player_obs))
+                self.bids[self.bid_idx] = player.current_bid
+                self.bid_idx += 1
+
+            elif isinstance(player,TrainPlayer):
+                if active_bid:
+                    raise UserWarning (f"Active bidding is not intended for Train Player --> active_bid flag is {active_bid}")
+                    self.bid_obs = player_obs
+                    return self.bid_obs, self.r, self.done, self.info
+                else:
+                    player.current_bid = round(self.current_round/self.n_players)
+                    self.bids[self.bid_idx] = player.current_bid
+                    self.bid_idx += 1
+            else:
+                raise UserWarning (f"Player is {type(player)} not instance of either AdversaryPlayer or TrainPlayer")
+                
+        if self.bid_idx == (self.n_players):
+            return self.init_step()
+            
     def init_step(self):
         self.state = "TURN"
         self.turn_idx = 0
@@ -190,9 +274,10 @@ class MagicManEnv(gym.Env):
                                    "n_cards"                    : torch.zeros(self.max_rounds),
                                    "played_cards"               : torch.zeros((self.n_players,60)),
                                    "legal_cards_tensor"         : torch.zeros(60),
+                                   "cards_tensor"               : torch.zeros(60),
                                    "current_suit"               : torch.zeros(6),
                                    }
-                
+                player.turn_obs["norm_bids"] = self.bids/self.current_round
                 player.turn_obs["player_idx"][self.turnorder_idx] = 1
                                 
                 player_self_bid_completion = torch.tanh(torch.tensor(player.round_suits-player.current_bid))
@@ -207,8 +292,10 @@ class MagicManEnv(gym.Env):
                 player.turn_obs["current_suit"]=self.current_suit
                 
                 for card in player.cards_obj:
+                    card_idx = deck.deck.index(card)
+                    player.turn_obs["cards_tensor"][card_idx] = 1
                     if card.legal:
-                        player.turn_obs["legal_cards_tensor"][deck.deck.index(card)] = 1
+                        player.turn_obs["legal_cards_tensor"][card_idx] = 1
                         
                 self.action_mask=player.turn_obs["legal_cards_tensor"]
                 assert sum(self.action_mask)>0 or not player.cards_obj, f"{player} has no valid moves: {player.cards_obj}"
@@ -233,7 +320,7 @@ class MagicManEnv(gym.Env):
                     if self.verbose_obs:
                         print(f"Adverse Player Observation: {player_obs}")
                     #action is input not output!!!
-                    net_out = player.play(self.get_flat(player_obs),self.action_mask)
+                    net_out = player.play(player_obs,self.action_mask)
                     action_idx = net_out
                     
                     played_card = deck.deck[action_idx]
@@ -287,7 +374,8 @@ class MagicManEnv(gym.Env):
                                "player_self_bid_completion" : torch.zeros(1),
                                "n_cards"                    : torch.zeros(self.max_rounds),
                                "played_cards"               : torch.zeros((self.n_players,60)),
-                               "legal_cards_tensor"               : torch.zeros(60),
+                               "legal_cards_tensor"         : torch.zeros(60),
+                               "cards_tensor"               : torch.zeros(60),
                                "current_suit"               : torch.zeros(6),
                                }
                 
@@ -305,8 +393,10 @@ class MagicManEnv(gym.Env):
             player.turn_obs["current_suit"]=self.current_suit
             
             for card in player.cards_obj:
+                card_idx = deck.deck.index(card)
+                player.turn_obs["cards_tensor"][card_idx] = 1
                 if card.legal:
-                    player.turn_obs["legal_cards_tensor"][deck.deck.index(card)] = 1
+                    player.turn_obs["legal_cards_tensor"][card_idx] = 1
             
             self.action_mask=player.turn_obs["legal_cards_tensor"]
             assert sum(self.action_mask)>0 or not player.cards_obj, f"{player} has no valid moves: {player.cards_obj}"
@@ -319,83 +409,9 @@ class MagicManEnv(gym.Env):
             
             
             
-    def init_bid_step(self,active_bid=False):
-
-        self.state = "BID"
-        
-        self.round_deck = deck.deck.copy()
-        random.shuffle(self.round_deck) 
-        
-        for _ in range(self.current_round):
-            for player in self.noorder_players:
-                player.cards_obj.append(self.round_deck.pop(-1))
-                #pop not only removes the item at index but also returns it
-                
-        self.bids = torch.full(tuple([self.n_players]),float(round(self.current_round/self.n_players)))#bids that are not yet given become 0 (bids are normalized so 0 is the expected bid)
-
-        self.bid_idx = 0
-        self.done = False
-        self.r,self.info = 0,{}
-
-        if active_bid:
-            self.bid_obs, self.r, self.done, self.info = self.bid_step(action=None,active_bid=active_bid)
-            return self.bid_obs.numpy(), self.r, self.done, self.info
-        else:
-            obs, self.r, self.done, self.info = self.bid_step(action=None,active_bid=active_bid)
-            return obs, self.r, self.done, self.info
 
 
-    def bid_step(self,action,active_bid=False): # !!not turn
-        
-        if action is not None:
-            self.bids[self.bid_idx] = action
-            self.train_player.current_bid = action
-            self.r,self.info = 0,{}
-            self.bid_idx += 1
-        
-        while self.bid_idx <= (self.n_players-1): # order is relevant
 
-            player = self.players[self.bid_idx]
-            
-            n_cards = torch.zeros(self.max_rounds)
-            n_cards[len(player.cards_obj)-1] = 1 # how many cards there are in his hand
-            player_idx = torch.zeros(self.n_players)
-            player_idx[self.players.index(player,0,self.n_players)] = 1 # what place in the players the player has
-
-            player.cards_tensor = torch.zeros(60)
-            for card in player.cards_obj:
-                player.cards_tensor[deck.deck.index(card)] = 1 # cards in hand
-            last_player_bool = torch.zeros(1)
-            #if self.players.index(player) ==  3
-            #    last_player_bool[0] = 1
-            
-            norm_bids = self.bids/self.current_round
-
-            player_obs = torch.cat((norm_bids,
-                                    player_idx,
-                                    n_cards,
-                                    player.cards_tensor,
-                                    torch.tensor([self.current_round])),dim=0)
-            
-            if isinstance(player,AdversaryPlayer):
-                
-                player.current_bid = round(self.current_round*player.bid(player_obs))
-                self.bids[self.bid_idx] = player.current_bid
-                self.bid_idx += 1
-
-            elif isinstance(player,TrainPlayer):
-                if active_bid:
-                    self.bid_obs = player_obs
-                    return self.bid_obs, self.r, self.done, self.info
-                else:
-                    player.current_bid = round(self.current_round/self.n_players)
-                    self.bids[self.bid_idx] = player.current_bid
-                    self.bid_idx += 1
-            else:
-                raise UserWarning (f"Player is {type(player)} not instance of either AdversaryPlayer or TrainPlayer")
-                
-        if self.bid_idx == (self.n_players):
-            return self.init_step()
 
 
     def conclude_step(self):
