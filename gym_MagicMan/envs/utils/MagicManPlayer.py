@@ -17,17 +17,7 @@ class AdversaryPlayer:
         self.cards_obj = []
         self.cards_tensor = torch.zeros(60) #one-hot encoded deck
         self.error_string = "empty"
-        
-        self.observation_shape ={_:{"norm_bids"                  : torch.zeros(self.n_players),
-                                    "all_bid_completion"         : torch.zeros(self.n_players),
-                                    "player_idx"                 : torch.zeros(self.n_players),
-                                    "player_self_bid_completion" : torch.zeros(1),
-                                    "n_cards"                    : torch.zeros(self.max_rounds),
-                                    "played_cards"               : torch.zeros((self.n_players,60)),
-                                    "legal_cards_tensor"         : torch.zeros(60),
-                                    "cards_tensor"               : torch.zeros(60),
-                                    "current_suit"               : torch.zeros(6),
-                                    } for _ in range(self.current_round)}
+                         
         
     def __repr__(self):
         return self.name

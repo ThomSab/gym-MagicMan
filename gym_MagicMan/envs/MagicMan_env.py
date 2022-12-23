@@ -8,7 +8,7 @@ import torch
 import random
 from collections import deque
 
-from gym_MagicMan.envs.utils.MagicManPlayer import TrainPlayer
+from gym_MagicMan.envs.utils.MagicManPlayer import TrainPlayer,AdversaryPlayer
 from gym_MagicMan.envs.utils.MagicManRandomAdversary import RandomAdversary
 import gym_MagicMan.envs.utils.MagicManDeck as deck
 
@@ -209,13 +209,14 @@ class MagicManEnv(gym.Env):
                                        
             player.bid_obs["n_cards"][len(player.cards_obj)-1] = 1 #how many cards there are in his hand
             
-            for card in player.cards_obj:card_idx = deck.deck.index(card)
-                player.turn_obs["cards_tensor"][card_idx] = 1
-                player.turn_obs["legal_cards_tensor"][card_idx] = 1
+            for card in player.cards_obj:
+                card_idx = deck.deck.index(card)
+                player.bid_obs["cards_tensor"][card_idx] = 1
+                player.bid_obs["legal_cards_tensor"][card_idx] = 1
 
             if isinstance(player,AdversaryPlayer):
                 
-                player.current_bid = round(self.current_round*player.bid(player_obs))
+                player.current_bid = round(self.current_round*player.bid(player.bid_obs))
                 self.bids[self.bid_idx] = player.current_bid
                 self.bid_idx += 1
 

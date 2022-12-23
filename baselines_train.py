@@ -17,8 +17,10 @@ from stable_baselines3.common.vec_env import DummyVecEnv
 from sb3_contrib.common.wrappers import ActionMasker
 from sb3_contrib.ppo_mask import MaskablePPO
 
-os.chdir(r'C:\Users\jasper\Documents\LINZ\Semester_III\SEMINAR\gym-MagicMan')
-
+try:
+    os.chdir(r'C:\Users\jasper\Documents\LINZ\Semester_III\SEMINAR\gym-MagicMan')
+except FileNotFoundError:
+    print("PATH NOT FOUND. - Ignore if run in Colab - ")
 
 config={"policy_type": "MlpPolicy",
         "learning_rate":1e-4,
@@ -28,7 +30,8 @@ config={"policy_type": "MlpPolicy",
        "current_round": 2}
 
 
-experiment_name = f"Masked_PPO_{int(time.time())}"
+experiment_name = f"CPU_Masked_PPO_{int(time.time())}"
+
 wandb.init(
         name=experiment_name,
         project="MagicManGym",
@@ -58,6 +61,7 @@ model = MaskablePPO(config["policy_type"], env, verbose=1 ,learning_rate=config[
         print(val.shape)
     input()
 """
+
 model.learn(total_timesteps=config["total_timesteps"],
             callback=WandbCallback(gradient_save_freq=1_000_000,
                                    verbose=2,

@@ -1,7 +1,7 @@
 import numpy
 import torch
 
-from MagicManPlayer import AdversaryPlayer
+from gym_MagicMan.envs.utils.MagicManPlayer import AdversaryPlayer
 
 class NaiveAdversary(AdversaryPlayer):
 

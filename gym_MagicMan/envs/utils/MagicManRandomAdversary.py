@@ -1,4 +1,4 @@
-from MagicManPlayer import AdversaryPlayer
+from gym_MagicMan.envs.utils.MagicManPlayer import AdversaryPlayer
 import torch
 from torch.distributions import Uniform, Categorical
 
@@ -18,7 +18,7 @@ class RandomAdversary(AdversaryPlayer):
 
     
     def bid(self,obs):
-        return self.bid_distribution.sample()
+        return self.bid_distribution.sample().item()
 
     def clean_hand(self):
         self.cards = []  
