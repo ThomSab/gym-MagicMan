@@ -10,6 +10,7 @@ from collections import deque
 
 from gym_MagicMan.envs.utils.MagicManPlayer import TrainPlayer,AdversaryPlayer
 from gym_MagicMan.envs.utils.MagicManRandomAdversary import RandomAdversary
+from gym_MagicMan.envs.utils.MagicManJulesAdversary import JulesAdversary
 import gym_MagicMan.envs.utils.MagicManDeck as deck
 
 
@@ -23,18 +24,20 @@ class MagicManEnv(gym.Env):
         self.verbose = verbose
         self.verbose_obs= verbose_obs
     
-        self.single_obs_space=394
+        self.single_obs_space=395
         
         self.round_deck = []
         self.players = []
         
         if adversaries=='random':
             self.players = [RandomAdversary() for _ in range(3)]
+        elif adversaries=='jules':
+            self.players = [JulesAdversary() for _ in range(3)]
         
         self.train_player = TrainPlayer()
         self.players.append(self.train_player)
-        self.noorder_players = self.players #pls dont be a deep copy
         self.n_players = len(self.players)
+        self.noorder_players = self.players #pls dont be a deep copy
         self.max_rounds = int(60/self.n_players)
         self.current_round = current_round
         self.bids = torch.zeros(self.n_players)#torch.full(tuple([self.n_players]),float(round(self.current_round/self.n_players)))
@@ -87,7 +90,11 @@ class MagicManEnv(gym.Env):
                                        "current_suit":Box(low=np.full((6),0),
                                                           high=np.full((6),1),
                                                       dtype=np.float32
-                                                      )#sparse
+                                                      ),#sparse
+                                       "round_active_flag":Box(low=np.full((1),0),
+                                                               high=np.full((1),1),
+                                                      dtype=np.float32
+                                                      )
                                       })
                                       for _ in range(self.current_round)})
         
@@ -104,7 +111,7 @@ class MagicManEnv(gym.Env):
         print("Bids are predetermined in this environment. --> see 'active bid' flag")
         print("Bid input is not ordered. Has to be implemented in the future.")
         self.r = 0
-        self.info = {}
+        self.info = {player.name:0 for player in self.players}
         self.done = False
         
         self.reset()
@@ -125,12 +132,11 @@ class MagicManEnv(gym.Env):
         
         self.bid_obs = None
         self.r = 0
-        self.info = {}
+        self.info = {player.name:0 for player in self.players}
         self.done = False
 
         for player in self.noorder_players:
             player.round_suits = 0
-            player.game_score = 0
             player.cards_obj = []
             player.round_obs = {_:{"norm_bids"                  : torch.zeros(self.n_players),
                                    "all_bid_completion"         : torch.zeros(self.n_players),
@@ -141,6 +147,7 @@ class MagicManEnv(gym.Env):
                                    "legal_cards_tensor"         : torch.zeros(60),
                                    "cards_tensor"               : torch.zeros(60),
                                    "current_suit"               : torch.zeros(6),
+                                   "round_active_flag"          : torch.zeros(1)
                                    } for _ in range(self.current_round)}
        
         obs,r,done,info = self.init_bid_step()
@@ -171,7 +178,7 @@ class MagicManEnv(gym.Env):
 
         self.bid_idx = 0
         self.done = False
-        self.r,self.info = 0,{}
+        self.r,self.info = 0,{player.name:0 for player in self.players}
 
         if active_bid:
             self.bid_obs, self.r, self.done, self.info = self.bid_step(action=None,active_bid=active_bid)
@@ -186,7 +193,7 @@ class MagicManEnv(gym.Env):
         if action is not None:
             self.bids[self.bid_idx] = action
             self.train_player.current_bid = action
-            self.r,self.info = 0,{}
+            self.r,self.info = 0,{player.name:0 for player in self.players}
             self.bid_idx += 1
         
         while self.bid_idx <= (self.n_players-1): # order is relevant
@@ -254,7 +261,6 @@ class MagicManEnv(gym.Env):
             played_card = deck.deck[action]
             self.turn_cards.append(played_card)
             self.train_player.cards_obj.remove(played_card)
-            self.r,self.info = 0,{}
             self.turnorder_idx +=1
             
         if action is None:
@@ -277,6 +283,7 @@ class MagicManEnv(gym.Env):
                                    "legal_cards_tensor"         : torch.zeros(60),
                                    "cards_tensor"               : torch.zeros(60),
                                    "current_suit"               : torch.zeros(6),
+                                   "round_active_flag"          : torch.ones(1)
                                    }
                 player.turn_obs["norm_bids"] = self.bids/self.current_round
                 player.turn_obs["player_idx"][self.turnorder_idx] = 1
@@ -345,7 +352,7 @@ class MagicManEnv(gym.Env):
                 
                 self.compute_final_turn_observations()
                 
-                deck.turn_value(self.turn_cards,self.trump,self.current_suit_idx) #turn value of the players cards    
+                deck.turn_value(self.turn_cards,self.current_suit_idx) #turn value of the players cards    
                 winner = self.players[[card.turn_value for card in self.turn_cards].index(max(card.turn_value for card in self.turn_cards))]        
                 self.starting_player(winner)# --> rearanges the players of the player such that the winner is in the first position
 
@@ -378,12 +385,13 @@ class MagicManEnv(gym.Env):
                                "legal_cards_tensor"         : torch.zeros(60),
                                "cards_tensor"               : torch.zeros(60),
                                "current_suit"               : torch.zeros(6),
+                               "round_active_flag"          : torch.zeros(1)
                                }
                 
             player.turn_obs["player_idx"][player_idx] = 1
                                 
             player_self_bid_completion = torch.tanh(torch.tensor(player.round_suits-player.current_bid))
-            player.turn_obs["player_self_bid_completion"]=torch.unsqueeze(player_self_bid_completion,0)
+            player.turn_obs["player_self_bid_completion"] = torch.unsqueeze(player_self_bid_completion,0)
                 
 
             player.turn_obs["n_cards"][len(player.cards_obj)-1] = 1 #how many cards there are in his hand
@@ -393,26 +401,14 @@ class MagicManEnv(gym.Env):
             self.current_suit[current_suit_idx] = 1
             player.turn_obs["current_suit"]=self.current_suit
             
-            for card in player.cards_obj:
-                card_idx = deck.deck.index(card)
-                player.turn_obs["cards_tensor"][card_idx] = 1
-                if card.legal:
-                    player.turn_obs["legal_cards_tensor"][card_idx] = 1
-            
-            self.action_mask=player.turn_obs["legal_cards_tensor"]
-            assert sum(self.action_mask)>0 or not player.cards_obj, f"{player} has no valid moves: {player.cards_obj}"
+            # no need to refresh the legal cards
+            # all players have played a card so legal is irrelevant
 
             for card_idx in range(len(self.turn_cards)):
                 played_card = self.turn_cards[card_idx]
                 player.turn_obs["played_cards"][card_idx][deck.deck.index(played_card)] = 1
             
             player.round_obs[self.turn_idx] = player.turn_obs 
-            
-            
-            
-
-
-
 
 
     def conclude_step(self):
@@ -425,10 +421,13 @@ class MagicManEnv(gym.Env):
             else:
                 round_reward =  -abs(player.current_bid-player.round_suits) #ten points for every falsly claimed suit
                 
-            player.game_score += round_reward
             if isinstance(player,TrainPlayer):
-               self.r = round_reward
-               self.done = True
+                self.r = round_reward
+                self.done = True
+                self.info[player.name] = player.current_bid-player.round_suits
+                
+            elif isinstance(player,AdversaryPlayer):
+                self.info[player.name] = player.current_bid-player.round_suits
                 
         for player in self.players:
             player.clean_hand() #at this point all hands should be empty anyways
@@ -443,6 +442,42 @@ class MagicManEnv(gym.Env):
 
 
 if __name__ == "__main__":
+    import matplotlib.pyplot as plt
+    current_round=5
 
-    raise UserWarning("Do not execute MagicMan_env. Run environment via gym.")
+    env = gym.make("MagicMan-v0",adversaries='jules',current_round=current_round)#,current_round=2,verbose=0,verbose_obs=0)
+    #env = gym.wrappers.FlattenObservation(env)
+
+    r_list = []
+    info_mean = None
+    for _ in range(1000):
+        done = False
+        obs = env.reset()
+        round_idx=0
+        while not done:
+            
+            assert sum(obs[round_idx]["legal_cards_tensor"])>0,f"legal cards tensor empty: {obs[turn_idx]['legal_cards_tensor']}"
+            legal_cards = torch.where(obs[round_idx]["legal_cards_tensor"]==1)[0]
+            legal_cards = torch.where(obs[round_idx]["legal_cards_tensor"]==1)[0]
+            action = random.choice(legal_cards)
+            obs, r, done, info = env.step(action)
+            round_idx+=1
+            
+        print(_)
+        if not info_mean:
+            info_mean = info
+            for key,val in info.items():
+                info_mean[key] = [val]
+        else:
+            for key,val in info.items():
+                info_mean[key].append(val)
     
+    for player,scores in info_mean.items(): 
+        print(player)
+        print(np.mean(scores))
+        plt.hist(scores,bins=list(range(min(scores),max(scores))),align='mid')
+        plt.title("player.current_bid-player.round_suits")
+        plt.xlabel("<-- bid too low   |   bid too high --->")
+        plt.show()
+        
+        

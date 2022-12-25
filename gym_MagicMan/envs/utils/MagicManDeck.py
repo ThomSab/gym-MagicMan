@@ -56,8 +56,9 @@ def rv(cards,trump): #round value --> what the cards are worth at the start of t
 
     
 
-
-def turn_value (cards,trump,current_suit): #turn value --> value is the index in the winning order of cards --> value of the first magic man should be the ceiling and the last jester is the floor
+def turn_value (cards,current_suit,trump=0): #turn value --> value is the index in the winning order of cards --> value of the first magic man should be the ceiling and the last jester is the floor
+    
+    assert trump==0,(f"trump was changed from zero (red) to {trump}")
     
     if current_suit != None:
         suit = current_suit #suit --> welche farbe angespielt wurde
@@ -85,8 +86,34 @@ def turn_value (cards,trump,current_suit): #turn value --> value is the index in
             card.turn_value = 'N/A' #to be disregarded
 
 
+def hand_turn_value(player_idx,hand_cards,current_suit,trump=0):
+
+    for card in hand_cards:
+        if card.legal:
+            if card.value == 14:
+                card.turn_value = 60 - player_idx.item()
+                
+            elif card.value == 0:
+                card.turn_value = 4  - player_idx.item()
+                
+            elif card.color == trump:
+                card.turn_value = 43 + card.value
+                
+            elif player_idx == 0 or card.color == current_suit:
+                card.turn_value = 30 + card.value
+            
+            elif card.color != current_suit and card.color != trump:
+                card.turn_value = 2*card.value + 3.5
+                
+            else:
+                return 'ERROR invalid card turn value'
+        else:
+            print("not legal")
+            card.turn_value = 'N/A' #to be disregarded 
+
+            
  
-def legal (played,hand,trump): #legal to play in this turn --> wich cards are allowed and which aren't
+def legal (played,hand,trump=0): #legal to play in this turn --> wich cards are allowed and which aren't
 
     hand = [deck[_] for _ in hand if _==1]
 
@@ -136,13 +163,10 @@ deck.sort(key = lambda x: x.value)
 
 
 if __name__ == "__main__":
-    for card in deck:
+
+    print("red cards:")
+    for card in deck[0:][::4][1:-1]:
         print(card)
-    
-    print(deck[-4:])
-    
-    for red_card in deck[0:][::4][1:-1]:
-        print(red_card)
 
 
 
