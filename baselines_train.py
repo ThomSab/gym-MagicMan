@@ -51,6 +51,7 @@ config={"policy_type": "MlpPolicy",
         "total_timesteps":1_000_000,
         "env_name": "MagicMan-v0",
         "current_round": 2,
+        "adversaries":'jules',
         "clip_range":0.2,#0.2
         "ent_coef":0.2,#0.0
         "vf_coef":0.5,#0.5
@@ -64,8 +65,10 @@ config={"policy_type": "MlpPolicy",
 experiment_name = f"CPU_MPPO_R{config['current_round']}_{int(time.time())}"
     
     
-def make_env():
-    env = gym.make(config["env_name"],current_round=config["current_round"])#,current_round=2,verbose=0,verbose_obs=0)
+def make_env(config=config):
+    env = gym.make(config["env_name"],
+                   current_round=config["current_round"],
+                   adversaries=config["adversaries"])
     env = Monitor(env)
     env = gym.wrappers.FlattenObservation(env)
     return env
