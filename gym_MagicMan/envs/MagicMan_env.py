@@ -8,6 +8,8 @@ import torch
 import random
 from collections import deque
 
+import pygame
+
 from gym_MagicMan.envs.utils.MagicManPlayer import TrainPlayer,AdversaryPlayer
 from gym_MagicMan.envs.utils.MagicManRandomAdversary import RandomAdversary
 from gym_MagicMan.envs.utils.MagicManJulesAdversary import JulesAdversary
@@ -15,7 +17,7 @@ import gym_MagicMan.envs.utils.MagicManDeck as deck
 
 
 class MagicManEnv(gym.Env):
-    metadata = {'render.modes': ['human']}
+    metadata = {'render.modes': ['human'], "render_fps": .1}
 
     def __init__(self,init_state=None,adversaries='random',verbose=False,verbose_obs=False,current_round=15):
         
@@ -47,6 +49,7 @@ class MagicManEnv(gym.Env):
         self.turnorder_idx = 0
         self.bid_idx = 0
         self.turn_cards = []
+        self.last_turn_cards = []
         self.current_suit_idx = 5
         self.current_suit = torch.zeros(6)
         self.all_bid_completion = torch.zeros(self.n_players)
@@ -114,6 +117,11 @@ class MagicManEnv(gym.Env):
         self.info = {player.name:0 for player in self.players}
         self.done = False
         
+        self.window = None
+        self.clock = None
+        self.window_size = 512
+        
+        
         self.reset()
     
     def get_flat(self,obs_dict):
@@ -155,10 +163,62 @@ class MagicManEnv(gym.Env):
         
         return obs
 
+    def render(self,mode):
+        if mode == "human":
+            self._render_frame(mode)
 
-    def render(self, mode='human', close=False):
-        raise NotImplementedError
-        
+    def _render_frame(self,mode):
+        if self.window is None and mode == "human":
+            pygame.init()
+            pygame.display.init()
+            pygame.display.set_caption(f'Magic Man Round {self.current_round}')
+            self.font = pygame.font.SysFont('Comic Sans MS', 20)
+            self.window = pygame.display.set_mode((self.window_size, self.window_size))
+        if self.clock is None and mode == "human":
+            self.clock = pygame.time.Clock()
+
+        canvas = pygame.Surface((self.window_size, self.window_size))
+        canvas.fill((255, 255, 255))
+       
+        if mode == "human":
+            # The following line copies our drawings from `canvas` to the visible window
+            
+            self.window.blit(canvas, canvas.get_rect())
+            pygame.event.pump()
+            
+            train_player_cards_y=0
+            for card in self.train_player.cards_obj:
+                card_surface = self.font.render(str(card), False, (0, 0, 0))
+                self.window.blit(card_surface,dest=(0,train_player_cards_y))
+                train_player_cards_y+=self.font.get_linesize()      
+                
+            turn_cards_y=0
+            for card in self.turn_cards:
+                card_surface = self.font.render(str(card), False, (0, 0, 0))
+                self.window.blit(card_surface,dest=(150,turn_cards_y))
+                turn_cards_y+=self.font.get_linesize()            
+            
+            last_turn_cards_y=0
+            for card in self.last_turn_cards:
+                card_surface = self.font.render(str(card), False, (0, 0, 0))
+                self.window.blit(card_surface,dest=(300,last_turn_cards_y))
+                last_turn_cards_y+=self.font.get_linesize()
+            
+            pygame.display.update()
+
+            # We need to ensure that human-rendering occurs at the predefined framerate.
+            # The following line will automatically add a delay to keep the framerate stable.
+            self.clock.tick(self.metadata["render_fps"])
+        else:  # rgb_array
+            return np.transpose(
+                np.array(pygame.surfarray.pixels3d(canvas)), axes=(1, 0, 2)
+            )
+            
+    def close(self):
+        if self.window is not None:
+            pygame.display.quit()
+            pygame.quit()    
+                       
     def starting_player(self,starting_player):
         self.players.rotate(  -self.players.index(starting_player) )
         
@@ -186,8 +246,7 @@ class MagicManEnv(gym.Env):
         else:
             obs, self.r, self.done, self.info = self.bid_step(action=None,active_bid=active_bid)
             return obs, self.r, self.done, self.info
-            
-            
+                        
     def bid_step(self,action,active_bid=False): # !!not turn
         
         if action is not None:
@@ -305,6 +364,7 @@ class MagicManEnv(gym.Env):
                     if card.legal:
                         player.turn_obs["legal_cards_tensor"][card_idx] = 1
                         
+                        
                 self.action_mask=player.turn_obs["legal_cards_tensor"]
                 assert sum(self.action_mask)>0 or not player.cards_obj, f"{player} has no valid moves: {player.cards_obj}"
 
@@ -343,6 +403,7 @@ class MagicManEnv(gym.Env):
                     if self.verbose_obs:
                         print(f"Train Player Observation: {player_obs}")
                     dict_round_obs = player_obs
+                        
                     return dict_round_obs, self.r, self.done, self.info
                     
                 else:
@@ -407,9 +468,9 @@ class MagicManEnv(gym.Env):
             for card_idx in range(len(self.turn_cards)):
                 played_card = self.turn_cards[card_idx]
                 player.turn_obs["played_cards"][card_idx][deck.deck.index(played_card)] = 1
+            self.last_turn_cards = self.turn_cards
             
             player.round_obs[self.turn_idx] = player.turn_obs 
-
 
     def conclude_step(self):
         assert self.turn_idx == self.current_round, (f"Turn index is {self.turn_idx} and should be equal to Current Round [{self.current_round}]")       
@@ -442,15 +503,14 @@ class MagicManEnv(gym.Env):
 
 
 if __name__ == "__main__":
-    import matplotlib.pyplot as plt
-    current_round=5
+    current_round=8
 
     env = gym.make("MagicMan-v0",adversaries='jules',current_round=current_round)#,current_round=2,verbose=0,verbose_obs=0)
     #env = gym.wrappers.FlattenObservation(env)
 
     r_list = []
     info_mean = None
-    for _ in range(1000):
+    for _ in range(1):
         done = False
         obs = env.reset()
         round_idx=0
@@ -458,26 +518,10 @@ if __name__ == "__main__":
             
             assert sum(obs[round_idx]["legal_cards_tensor"])>0,f"legal cards tensor empty: {obs[turn_idx]['legal_cards_tensor']}"
             legal_cards = torch.where(obs[round_idx]["legal_cards_tensor"]==1)[0]
-            legal_cards = torch.where(obs[round_idx]["legal_cards_tensor"]==1)[0]
             action = random.choice(legal_cards)
             obs, r, done, info = env.step(action)
             round_idx+=1
             
-        print(_)
-        if not info_mean:
-            info_mean = info
-            for key,val in info.items():
-                info_mean[key] = [val]
-        else:
-            for key,val in info.items():
-                info_mean[key].append(val)
-    
-    for player,scores in info_mean.items(): 
-        print(player)
-        print(np.mean(scores))
-        plt.hist(scores,bins=list(range(min(scores),max(scores))),align='mid')
-        plt.title("player.current_bid-player.round_suits")
-        plt.xlabel("<-- bid too low   |   bid too high --->")
-        plt.show()
-        
+            env.render(mode='human')
+    env.close()
         

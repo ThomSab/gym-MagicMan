@@ -81,8 +81,10 @@ def turn_value (cards,current_suit,trump=0): #turn value --> value is the index 
                 card.turn_value = 2*card.value + 3.5
                 
             else:
-                return 'ERROR invalid card turn value'
+                raise UserWarning(f'ERROR invalid card turn value for {str(card)}')
+                return
         else:
+            raise UserWarning(f'ERROR invalid card turn value for {str(card)}')
             card.turn_value = 'N/A' #to be disregarded
 
 
@@ -106,16 +108,15 @@ def hand_turn_value(player_idx,hand_cards,current_suit,trump=0):
                 card.turn_value = 2*card.value + 3.5
                 
             else:
-                return 'ERROR invalid card turn value'
+                raise UserWarning (f'ERROR invalid card turn value for {str(card)}')
+                return 
         else:
-            print("not legal")
-            card.turn_value = 'N/A' #to be disregarded 
+            #print(f"{str(card)}'s turn value is not accounted for")
+            card.turn_value = 0 #to be disregarded 
 
             
  
 def legal (played,hand,trump=0): #legal to play in this turn --> wich cards are allowed and which aren't
-
-    hand = [deck[_] for _ in hand if _==1]
 
     for card in hand:
         card.legal = True
@@ -138,7 +139,6 @@ def legal (played,hand,trump=0): #legal to play in this turn --> wich cards are 
         else:#the suit is empty
             foolean = False#bool is set to false to end the loop
             
-
     if suit in [0,1,2,3] and suit not in [4,5]:
         for card in hand:
             if card.color == suit:
@@ -148,7 +148,6 @@ def legal (played,hand,trump=0): #legal to play in this turn --> wich cards are 
             for card in hand:
                 if card.color != suit and card.color not in [4,5]: #magic men and jesters are always legal
                     card.legal = False
-	
     return suit
 
 def net_arr_trans(list_arg,length):#network array transform

@@ -10,6 +10,55 @@ class JulesAdversary(AdversaryPlayer):
 
 
     """
+    Round 2
+    AdversaryPlayer622424
+    0.2178
+    AdversaryPlayer825622
+    0.2386
+    AdversaryPlayer824997
+    0.2222
+    
+    Round 3
+    AdversaryPlayer854383
+    0.0857
+    AdversaryPlayer636705
+    0.0665
+    AdversaryPlayer251647
+    0.0968
+    TrainPlayer727031
+    0.1223
+    
+    Round 6
+    AdversaryPlayer699149
+    -0.0891
+    AdversaryPlayer342757
+    -0.09
+    AdversaryPlayer145428
+    -0.0896
+    TrainPlayer121391
+    0.0071
+    
+    Round 10
+    TrainPlayer177419
+    -1.6445
+    AdversaryPlayer637333
+    -0.2177
+    AdversaryPlayer343616
+    -0.2162
+    AdversaryPlayer992781
+    -0.2162
+    
+    Round 15
+    AdversaryPlayer274368
+    -0.302
+    AdversaryPlayer153045
+    -0.3189
+    TrainPlayer118756
+    -1.7445
+    AdversaryPlayer947529
+    -0.3066
+    
+    
     player.round_obs = {_:
                             {
                                 "norm_bids"                  : torch.zeros(self.n_players),
@@ -79,7 +128,7 @@ class JulesAdversary(AdversaryPlayer):
         
         
         
-        cards_value_dict = {card:card.turn_value for card in self.cards_obj}
+        cards_value_dict = {card:card.turn_value for card in self.cards_obj if card.legal}
         
         max_val_played=0
         if played_cards_obj:
@@ -89,11 +138,15 @@ class JulesAdversary(AdversaryPlayer):
         
         
         
-        if self.mode == "GET_SUITS" and can_take_suit:
-            maxval_card = max(cards_value_dict, key=cards_value_dict.get)
-            return deck.deck.index(maxval_card)
+        if self.mode == "GET_SUITS":
+            if can_take_suit:
+                maxval_card = max(cards_value_dict, key=cards_value_dict.get)
+                return deck.deck.index(maxval_card)
+            else:
+                minval_card = min(cards_value_dict, key=cards_value_dict.get)
+                return deck.deck.index(minval_card)
             
-        elif self.mode == "STOP_SUITS" or not can_take_suit:
+        elif self.mode == "STOP_SUITS":
             if max_val_played>0:
                 win_cards = [key for key,val in cards_value_dict.items() if val>max_val_played]
                 if len(win_cards)<len(cards_value_dict.values()):
@@ -112,8 +165,6 @@ class JulesAdversary(AdversaryPlayer):
         # dont be a fool with the fool
         # play the wizards on the valuable piles
         
-        # wenn keine stiche mehr bitte:
-        #   moeglichst hohe karten unter gewinnen spielen
         
         # karten zaehlen
     
@@ -121,3 +172,5 @@ class JulesAdversary(AdversaryPlayer):
 
     def clean_hand(self):
         self.cards = []  
+        
+    
