@@ -7,58 +7,7 @@ from torch.distributions import Uniform, Categorical
 
 
 class JulesAdversary(AdversaryPlayer):
-
-
     """
-    Round 2
-    AdversaryPlayer622424
-    0.2178
-    AdversaryPlayer825622
-    0.2386
-    AdversaryPlayer824997
-    0.2222
-    
-    Round 3
-    AdversaryPlayer854383
-    0.0857
-    AdversaryPlayer636705
-    0.0665
-    AdversaryPlayer251647
-    0.0968
-    TrainPlayer727031
-    0.1223
-    
-    Round 6
-    AdversaryPlayer699149
-    -0.0891
-    AdversaryPlayer342757
-    -0.09
-    AdversaryPlayer145428
-    -0.0896
-    TrainPlayer121391
-    0.0071
-    
-    Round 10
-    TrainPlayer177419
-    -1.6445
-    AdversaryPlayer637333
-    -0.2177
-    AdversaryPlayer343616
-    -0.2162
-    AdversaryPlayer992781
-    -0.2162
-    
-    Round 15
-    AdversaryPlayer274368
-    -0.302
-    AdversaryPlayer153045
-    -0.3189
-    TrainPlayer118756
-    -1.7445
-    AdversaryPlayer947529
-    -0.3066
-    
-    
     player.round_obs = {_:
                             {
                                 "norm_bids"                  : torch.zeros(self.n_players),

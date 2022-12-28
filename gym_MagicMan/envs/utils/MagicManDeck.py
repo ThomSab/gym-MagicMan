@@ -16,13 +16,13 @@ class Card:
         self.legal = True
         
         if self.value == 0:
-            self.name = '{} Fool'.format(colors[self.color])
+            self.name = '{}_Fool'.format(colors[self.color])
             self.color = 5
         elif self.value == 14:
-            self.name = '{} Magic Man'.format(colors[self.color])
+            self.name = '{}_Magic_Man'.format(colors[self.color])
             self.color = 4
         else:
-            self.name = '{0} {1}'.format(colors[self.color],self.value)
+            self.name = '{0}_{1}'.format(colors[self.color],self.value)
     
     def __str__ (self):
         return self.name
@@ -167,6 +167,8 @@ if __name__ == "__main__":
     for card in deck[0:][::4][1:-1]:
         print(card)
 
+    for _ in range(60):
+        print(_,deck[_])
 
 
 
