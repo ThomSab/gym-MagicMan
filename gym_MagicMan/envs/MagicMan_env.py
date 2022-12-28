@@ -49,9 +49,8 @@ class MagicManEnv(gym.Env):
         self.noorder_players = self.players
         
         if self.render_mode == "human":
-            for player_idx,player in enumerate(self.noorder_players):
-                train_player_idx = self.noorder_players.index(self.train_player)
-                self.train_player.table_idx=0
+            train_player_idx = self.players.index(self.train_player)
+            for player_idx,player in enumerate(self.players):
                 player.table_idx = ((player_idx+(4-train_player_idx))%4)
         
         self.players = deque(self.players) #pick from a list of players
@@ -129,10 +128,7 @@ class MagicManEnv(gym.Env):
         self.window = None
         self.clock = None
         self.window_size = 700
-        
-        
-        self.reset()
-    
+            
     def get_flat(self,obs_dict):
         return torch.from_numpy(gym.spaces.flatten(self.observation_space,obs_dict)).to(self.device)
     
@@ -140,6 +136,12 @@ class MagicManEnv(gym.Env):
         self.round_deck = []
         self.bids = torch.zeros(self.n_players) #torch.full(tuple([self.n_players]),float(round(self.current_round/self.n_players)))
         random.shuffle(self.players)
+        
+        if self.render_mode == "human":
+            train_player_idx = self.players.index(self.train_player)
+            for player_idx,player in enumerate(self.players):
+                player.table_idx = ((player_idx+(4-train_player_idx))%4)
+        
         self.players = deque(self.players)
         self.turnorder_idx = 0
         self.turn_cards = []
@@ -343,8 +345,7 @@ class MagicManEnv(gym.Env):
             if type(action)==np.ndarray:
                 action=torch.from_numpy(action)
             if self.verbose:
-                print(f"Train Player action mask: {self.action_mask}")
-                print(f"Train Player action: {deck.deck[action]}\nTrain Player hand: {self.train_player.cards_obj}")
+                print(f"Train Player action: {deck.deck[action]}")
             played_card = deck.deck[action]
             self.turn_cards.append(played_card)
             self.train_player.cards_obj.remove(played_card)
@@ -356,8 +357,6 @@ class MagicManEnv(gym.Env):
         norm_bids = self.bids/self.current_round
 
         while True: #returns when necessary
-            print(self.turnorder_idx)
-            print(self.players)
             if not self.turnorder_idx == (self.n_players):
                 #____________________________________________________
                 #collecting observation
@@ -423,15 +422,17 @@ class MagicManEnv(gym.Env):
                     
                     played_card = deck.deck[action_idx]
                     if self.verbose:
-                        print(f"Adv Intended Card: {played_card}\nAdv Player Hand: {player.cards_obj}")
+                        print(f"{player} Intended Card: {played_card}")
 
                     player.cards_obj.remove(played_card)
                     self.turn_cards.append(played_card)
                     self.turnorder_idx +=1
+                    #--> go round the circle again
                     
                 elif isinstance(player,TrainPlayer):
                     if self.verbose_obs:
                         print(f"Train Player Observation: {player_obs}")
+                        print(f"Train Player action mask: {self.action_mask}")
                     dict_round_obs = player_obs
                         
                     return dict_round_obs, self.r, self.done, self.info
@@ -459,7 +460,6 @@ class MagicManEnv(gym.Env):
                 if self.turn_idx == self.current_round:
                     return self.conclude_step()
 
-        raise UserWarning (f"Turn Step should have returned an Observation but has not")
 
     def compute_final_turn_observations(self):
         
@@ -535,7 +535,7 @@ class MagicManEnv(gym.Env):
 if __name__ == "__main__":
     current_round=8
 
-    env = gym.make("MagicMan-v0",adversaries='jules',current_round=current_round,render_mode='human')#,current_round=2,verbose=0,verbose_obs=0)
+    env = gym.make("MagicMan-v0",adversaries='jules',current_round=current_round,render_mode='human',verbose=True)#,current_round=2,verbose=0,verbose_obs=0)
     #env = gym.wrappers.FlattenObservation(env)
 
     r_list = []
@@ -543,14 +543,12 @@ if __name__ == "__main__":
     for _ in range(1):
         done = False
         obs = env.reset()
-            
         round_idx=0
         while not done:
             env.render()
 
             assert sum(obs[round_idx]["legal_cards_tensor"])>0,f"legal cards tensor empty: {obs[turn_idx]['legal_cards_tensor']}"
             legal_cards = torch.where(obs[round_idx]["legal_cards_tensor"]==1)[0]
-            print(env.turn_cards)
             for card_idx in legal_cards:
                 print(f"{card_idx} : {deck.deck[card_idx]}")
             action = int(input("action:\n"))
