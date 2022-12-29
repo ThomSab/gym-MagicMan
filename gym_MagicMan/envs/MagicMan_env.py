@@ -384,7 +384,7 @@ class MagicManEnv(gym.Env):
 
                 self.current_suit = torch.zeros(6)
                 self.current_suit_idx = deck.legal(self.turn_cards,player.cards_obj,self.trump)
-                self.current_suit[current_suit_idx] = 1
+                self.current_suit[self.current_suit_idx] = 1
                 player.turn_obs["current_suit"]=self.current_suit
                 
                 for card in player.cards_obj:
