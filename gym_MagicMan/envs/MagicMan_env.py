@@ -18,7 +18,7 @@ import gym_MagicMan.envs.utils.MagicManDeck as deck
 
 
 class MagicManEnv(gym.Env):
-    metadata = {'render.modes': ['human'], "render_fps": 1}
+    metadata = {'render.modes': ['human','human_interactive'], "render_fps": 30}
 
     def __init__(self,init_state=None,adversaries='random',render_mode=None,verbose=False,verbose_obs=False,current_round=15):
         
@@ -48,7 +48,7 @@ class MagicManEnv(gym.Env):
         random.shuffle(self.players)
         self.noorder_players = self.players
         
-        if self.render_mode == "human":
+        if self.render_mode in ["human","human_interactive"]:
             train_player_idx = self.players.index(self.train_player)
             for player_idx,player in enumerate(self.players):
                 player.table_idx = ((player_idx+(4-train_player_idx))%4)
@@ -127,7 +127,7 @@ class MagicManEnv(gym.Env):
         
         self.window = None
         self.clock = None
-        self.window_size = 700
+        self.window_size = (1000,700)
             
     def get_flat(self,obs_dict):
         return torch.from_numpy(gym.spaces.flatten(self.observation_space,obs_dict)).to(self.device)
@@ -137,7 +137,7 @@ class MagicManEnv(gym.Env):
         self.bids = torch.zeros(self.n_players) #torch.full(tuple([self.n_players]),float(round(self.current_round/self.n_players)))
         random.shuffle(self.players)
         
-        if self.render_mode == "human":
+        if self.render_mode in ["human","human_interactive"]:
             train_player_idx = self.players.index(self.train_player)
             for player_idx,player in enumerate(self.players):
                 player.table_idx = ((player_idx+(4-train_player_idx))%4)
@@ -169,23 +169,23 @@ class MagicManEnv(gym.Env):
                                    "round_active_flag"          : torch.zeros(1)
                                    } for _ in range(self.current_round)}
        
-        if self.window is None and self.render_mode == "human":
+        if self.window is None and self.render_mode in ["human","human_interactive"]:
             pygame.init()
             pygame.display.init()
             pygame.display.set_caption(f'Magic Man Round {self.current_round}')
             
             self.font = pygame.font.SysFont('Comic Sans MS', 20)
-            self.window = pygame.display.set_mode((self.window_size, self.window_size))
+            self.window = pygame.display.set_mode(self.window_size)
             
             
-        if self.clock is None and self.render_mode == "human":
+        if self.clock is None and self.render_mode in ["human","human_interactive"]:
             self.clock = pygame.time.Clock()
 
-            self.canvas = pygame.Surface((self.window_size, self.window_size))
+            self.canvas = pygame.Surface(self.window_size)
             self.canvas.fill((255, 255, 255))
             
-            self.hand_positions_dict = mm_render.get_hand_positions_dict(self.window_size)
-            self.center_pos_dict = mm_render.get_center_pos_dict(self.window_size)
+            self.hand_pos_dict = mm_render.get_hand_pos_dict(*self.window_size)
+            self.center_pos_dict = mm_render.get_center_pos_dict(*self.window_size)
            
        
         self.give_out_cards()
@@ -193,22 +193,16 @@ class MagicManEnv(gym.Env):
    
         return obs
 
-    def render(self,placeholder_arg=None):
-        #no idea why the placeholder arg has to be here it does not make any sense
-        if self.render_mode == "human":
-            self._render_frame()
+    def render(self,placeholder_arg=None,last_step=False):
 
-    def _render_frame(self):
-
-       
-        if self.render_mode == "human":
+        if self.render_mode in ["human","human_interactive"] :
             # The following line copies our drawings from `canvas` to the visible window
             
             self.window.blit(self.canvas, self.canvas.get_rect())
             pygame.event.pump()
             
             for player in self.players:
-                mm_render.render_hand_cards(player,self.hand_positions_dict,self.card_sprite_dict,self.window)
+                mm_render.render_hand_cards(player,self.hand_pos_dict,self.card_sprite_dict,self.window)
                 
             
             for card_idx,card in enumerate(self.turn_cards):
@@ -226,13 +220,30 @@ class MagicManEnv(gym.Env):
                 self.window.blit(card_surface,dest=card_loc)
             
             
+            
             pygame.display.update()
 
-            # We need to ensure that human-rendering occurs at the predefined framerate.
-            # The following line will automatically add a delay to keep the framerate stable.
-            self.clock.tick(self.metadata["render_fps"])
-        else:
-            raise UserWarning("Do not attempt to render the environment when it is not in render mode!")
+            if self.render_mode=="human_interactive":
+                if last_step:
+                    return None
+                while True:
+                    for event in pygame.event.get():
+                        if event.type == pygame.MOUSEBUTTONDOWN:
+                            for card in self.train_player.cards_obj:
+                                card_sprite = self.card_sprite_dict[str(card)]
+                                if card_sprite.rect.collidepoint(pygame.mouse.get_pos()):
+                                    intended_card_idx = deck.deck.index(card)
+                                    self.action_mask
+
+                                    if self.action_mask[intended_card_idx]:
+                                        return intended_card_idx
+                                    else:
+                                        print(f"{str(card)} is not legal")
+                                        #eternal judgement will be cast on me for going 10 dents deep
+                                      
+                self.clock.tick(self.metadata["render_fps"])
+            else:
+                raise UserWarning("Do not attempt to render the environment when it is not in render mode!")
             
     def close(self):
         if self.window is not None:
@@ -246,7 +257,7 @@ class MagicManEnv(gym.Env):
         self.round_deck = deck.deck.copy()
         random.shuffle(self.round_deck) 
    
-        if self.render_mode=="human":
+        if self.render_mode in ["human","human_interactive"]:
             self.card_sprite_dict = {str(card):mm_render.CardSprite(card) for card in deck.deck}
             for card_name,card_sprite in self.card_sprite_dict.items():
                 card_sprite.owned_by          
@@ -256,7 +267,7 @@ class MagicManEnv(gym.Env):
                 card = self.round_deck.pop(-1)
                 player.cards_obj.append(card)
                 
-                if self.render_mode=="human":
+                if self.render_mode in ["human","human_interactive"]:
                     self.card_sprite_dict[str(card)].owned_by(player.table_idx)
                     
  
@@ -340,7 +351,7 @@ class MagicManEnv(gym.Env):
         return flat_round_obs, self.r, self.done, self.info
             
     def step(self,action): #!!not round
-        
+                
         if action is not None:
             if type(action)==np.ndarray:
                 action=torch.from_numpy(action)
@@ -350,6 +361,7 @@ class MagicManEnv(gym.Env):
             self.turn_cards.append(played_card)
             self.train_player.cards_obj.remove(played_card)
             self.turnorder_idx +=1
+            
             
         if action is None:
             assert self.turnorder_idx==0, f"The turn index is {self.turnorder_idx} | Should be 0."
@@ -535,7 +547,7 @@ class MagicManEnv(gym.Env):
 if __name__ == "__main__":
     current_round=8
 
-    env = gym.make("MagicMan-v0",adversaries='jules',current_round=current_round,render_mode='human',verbose=True)#,current_round=2,verbose=0,verbose_obs=0)
+    env = gym.make("MagicMan-v0",adversaries='jules',current_round=current_round,render_mode='human_interactive',verbose=True)#,current_round=2,verbose=0,verbose_obs=0)
     #env = gym.wrappers.FlattenObservation(env)
 
     r_list = []
@@ -545,18 +557,13 @@ if __name__ == "__main__":
         obs = env.reset()
         round_idx=0
         while not done:
-            env.render()
-
-            assert sum(obs[round_idx]["legal_cards_tensor"])>0,f"legal cards tensor empty: {obs[turn_idx]['legal_cards_tensor']}"
-            legal_cards = torch.where(obs[round_idx]["legal_cards_tensor"]==1)[0]
-            for card_idx in legal_cards:
-                print(f"{card_idx} : {deck.deck[card_idx]}")
-            action = int(input("action:\n"))
-            #action = random.choice(legal_cards)
+            action = env.render()
+            print(action)
             obs, r, done, info = env.step(action)
             round_idx+=1
             
-    env.render()
+    env.render(last_step=True)
+    print(f"You recieve {r*10} points.")
+    input()
     env.close()
-    print(r)
-        
+

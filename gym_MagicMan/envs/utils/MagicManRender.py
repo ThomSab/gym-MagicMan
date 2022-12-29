@@ -3,16 +3,16 @@ import os
 from gym_MagicMan.envs.utils.MagicManDeck import Card
 
 try:
-    os.chdir(r"C:\Users\jasper\Documents\LINZ\Semester_III\SEMINAR\gym-MagicMan\gym_MagicMan\envs\imgs")
+    os.chdir(r"C:\Users\jasper\Documents\LINZ\Semester_III\SEMINAR\gym-MagicMan")
 except:
     print("Changing directory to load the card sprites failed. Ignore if executed in notebook.")
 
 class CardSprite(pygame.sprite.Sprite):
     def __init__(self,card):
         super(CardSprite, self).__init__()
-        self.card_img = pygame.image.load(f"{str(card)}.png")
+        self.card_img = pygame.image.load(f"gym_MagicMan\envs\imgs\{str(card)}.png")
         self.surface = self.card_img.convert()
-        self.backside = pygame.image.load("Backside.png").convert()
+        self.backside = pygame.image.load("gym_MagicMan\envs\imgs\Backside.png").convert()
         self.rect = self.surface.get_rect()
         
     def owned_by(self,player_idx):
@@ -24,7 +24,7 @@ def reset_cards(sprite_deck):
         card_sprite.surface = card_sprite.card_img.convert()
         
 
-def get_hand_positions_dict(canvas_size_x,canvas_size_y=None):
+def get_hand_pos_dict(canvas_size_x,canvas_size_y=None):
     if not canvas_size_y:
         canvas_size_y = canvas_size_x
     
@@ -58,5 +58,7 @@ def get_center_pos_dict(canvas_size_x,canvas_size_y=None):
 def render_hand_cards(player,hand_positions_dict,card_sprite_dict,window):
     
     for card_idx,card in enumerate(player.cards_obj):
-        card_surface = card_sprite_dict[str(card)].surface
-        window.blit(card_surface,dest=hand_positions_dict[player.table_idx][card_idx])
+        card_sprite = card_sprite_dict[str(card)]
+        pos = hand_positions_dict[player.table_idx][card_idx]
+        card_sprite.rect = card_sprite.surface.get_rect().move(*pos)
+        window.blit(card_sprite.surface,dest=pos)

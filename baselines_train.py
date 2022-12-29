@@ -17,6 +17,8 @@ from stable_baselines3.common.vec_env import DummyVecEnv
 from sb3_contrib.common.wrappers import ActionMasker
 from sb3_contrib.ppo_mask import MaskablePPO
 
+import cProfile
+
 try:
     os.chdir(r'C:\Users\jasper\Documents\LINZ\Semester_III\SEMINAR\gym-MagicMan')
 except FileNotFoundError:
@@ -79,6 +81,7 @@ def mask_fn(env: gym.Env) -> torch.Tensor:
 
 if __name__ == "__main__":
     experiment_name = f"CPU_MPPO_R{config['current_round']}_{int(time.time())}"
+    """
     wandb.init(
             name=experiment_name,
             project="MagicManGym",
@@ -87,7 +90,7 @@ if __name__ == "__main__":
             monitor_gym=True,  # auto-upload the videos of agents playing the game
             save_code=True,  # optional
     )
-
+    """
     env = make_env()
     env = ActionMasker(env, mask_fn)
     model = MaskablePPO(config["policy_type"], env, verbose=1,
@@ -108,9 +111,12 @@ if __name__ == "__main__":
         for key,val in params["policy"].items():
             print(key)
             print(val.shape)
-    """
+    
     model.learn(total_timesteps=config["total_timesteps"],
                 callback=WandbCallback(gradient_save_freq=1_000_000,
                                        verbose=2,
                                        model_save_freq=1_000_000,
                                        model_save_path=f"models/{experiment_name}",))
+    """
+    
+    cProfile.run("model.learn(total_timesteps=100000)")

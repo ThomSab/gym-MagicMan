@@ -40,12 +40,12 @@ class JulesAdversary(AdversaryPlayer):
         
         magic_man_bid = self.mgm_factor * sum(obs["legal_cards_tensor"][-4:])
         tmp_cards = obs["legal_cards_tensor"][::4][1:-1]
-        trump_bid = self.tmp_n_factor * sum(tmp_cards) + self.tmp_val_factor * sum([tmp_cards[_]*(_+1) for _ in range(len(tmp_cards))])
+        trump_bid = self.tmp_n_factor * sum(tmp_cards) + self.tmp_val_factor * sum([tmp_card*(_+1) for _,tmp_card in enumerate(tmp_cards)])
         
         clr_bid_dict = {"yellow_bid":0,"blue_bid":0,"green_bid":0}
         for clr_idx,clr_name in enumerate(clr_bid_dict.keys()):
             clr_cards = obs["legal_cards_tensor"][clr_idx+1:][::4][1:-1]
-            clr_bid_dict[clr_name] = self.clr_n_factor * sum(clr_cards) + self.clr_val_factor * sum([clr_cards[_]*(_+1) for _ in range(len(clr_cards))])
+            clr_bid_dict[clr_name] = self.clr_n_factor * sum(clr_cards) + self.clr_val_factor * sum([clr_card*(_+1) for _,clr_card in enumerate(clr_cards)])
         
         fool_bid = self.foo_factor * sum(obs["legal_cards_tensor"][:4])
         
@@ -69,7 +69,7 @@ class JulesAdversary(AdversaryPlayer):
             raise UserWarning (f"Adversary bid completion is faulty {obs['player_self_bid_completion']}")
         
         
-        played_cards_obj = [deck.deck[torch.where(obs["played_cards"][turn]==1)[0]] for turn in range(len(obs["norm_bids"])) if sum(obs["played_cards"][turn])>0]
+        played_cards_obj = [deck.deck[torch.argmax(turn_played_cards).item()] for turn_played_cards in obs["played_cards"] if sum(turn_played_cards)>0]
         current_suit_idx = deck.legal(played_cards_obj,self.cards_obj)
         
         deck.turn_value(played_cards_obj,current_suit_idx)
