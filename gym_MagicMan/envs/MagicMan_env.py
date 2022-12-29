@@ -383,7 +383,7 @@ class MagicManEnv(gym.Env):
                 player.turn_obs["n_cards"][len(player.cards_obj)-1] = 1 #how many cards there are in his hand
 
                 self.current_suit = torch.zeros(6)
-                current_suit_idx = deck.legal(self.turn_cards,player.cards_obj,self.trump)
+                self.current_suit_idx = deck.legal(self.turn_cards,player.cards_obj,self.trump)
                 self.current_suit[current_suit_idx] = 1
                 player.turn_obs["current_suit"]=self.current_suit
                 
@@ -558,4 +558,5 @@ if __name__ == "__main__":
             
     env.render()
     env.close()
+    print(r)
         
