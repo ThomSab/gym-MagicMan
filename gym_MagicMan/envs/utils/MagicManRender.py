@@ -5,7 +5,7 @@ from gym_MagicMan.envs.utils.MagicManDeck import Card
 try:
     os.chdir(r"C:\Users\jasper\Documents\LINZ\Semester_III\SEMINAR\gym-MagicMan\gym_MagicMan\envs\imgs")
 except:
-    raise UserWarning("chdir did not work")
+    print("Changing directory to load the card sprites failed. Ignore if executed in notebook.")
 
 class CardSprite(pygame.sprite.Sprite):
     def __init__(self,card):
