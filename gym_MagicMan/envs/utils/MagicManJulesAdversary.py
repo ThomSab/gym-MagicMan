@@ -22,7 +22,7 @@ class JulesAdversary(AdversaryPlayer):
                         for _ in range(self.current_round)}
     """
 
-    def __init__(self,play_network=None):
+    def __init__(self):
         super().__init__()
         
         self.mgm_factor     = 1

@@ -1,12 +1,13 @@
 import gym
 import gym_MagicMan
 
+
 import torch
 import os
 import time
 
-from wandb.integration.sb3 import WandbCallback
 import wandb
+from wandb.integration.sb3 import WandbCallback
 
 from stable_baselines3 import A2C,PPO
 from stable_baselines3.common import env_checker
@@ -17,7 +18,8 @@ from stable_baselines3.common.vec_env import DummyVecEnv
 from sb3_contrib.common.wrappers import ActionMasker
 from sb3_contrib.ppo_mask import MaskablePPO
 
-import cProfile
+from gym_MagicMan.envs.utils.MagicManTrainedAdversary import TrainedAdversary
+
 
 try:
     os.chdir(r'C:\Users\jasper\Documents\LINZ\Semester_III\SEMINAR\gym-MagicMan')
@@ -52,7 +54,7 @@ config={"policy_type": "MlpPolicy",
         "batch_size":128,
         "total_timesteps":1_000_000,
         "env_name": "MagicMan-v0",
-        "current_round": 2,
+        "current_round": 8,
         "adversaries":'jules',
         "clip_range":0.2,#0.2
         "ent_coef":0.2,#0.0
@@ -78,45 +80,54 @@ def make_env(config=config):
 def mask_fn(env: gym.Env) -> torch.Tensor:
     return env.action_mask
 
-
-if __name__ == "__main__":
-    experiment_name = f"CPU_MPPO_R{config['current_round']}_{int(time.time())}"
-    """
-    wandb.init(
-            name=experiment_name,
-            project="MagicManGym",
-            config=config,
-            sync_tensorboard=True,  # auto-upload sb3's tensorboard metrics
-            monitor_gym=True,  # auto-upload the videos of agents playing the game
-            save_code=True,  # optional
-    )
-    """
-    env = make_env()
-    env = ActionMasker(env, mask_fn)
-    model = MaskablePPO(config["policy_type"], env, verbose=1,
-                        learning_rate=config["learning_rate"],
-                        clip_range = config["clip_range"],
-                        ent_coef = config["ent_coef"],
-                        vf_coef = config["vf_coef"],
-                        normalize_advantage = config["normalize_advantage"],
-                        n_epochs = config["n_epochs"],
-                        gamma = config["gamma"],
-                        gae_lambda = config["gae_lambda"],
-                        batch_size=config["batch_size"],
-                        policy_kwargs = config["policy_kwargs"],
-                        tensorboard_log=f"runs/{experiment_name}")
-
-    """
-        params = model.get_parameters()
-        for key,val in params["policy"].items():
-            print(key)
-            print(val.shape)
+def profile():
+    cProfile.run("model.learn(total_timesteps=100000)")    
     
+def train():
     model.learn(total_timesteps=config["total_timesteps"],
                 callback=WandbCallback(gradient_save_freq=1_000_000,
                                        verbose=2,
                                        model_save_freq=1_000_000,
-                                       model_save_path=f"models/{experiment_name}",))
-    """
+                                       model_save_path=f"models/{experiment_name}",))   
+                                   
+def print_params(model):
+    params = model.get_parameters()
+    for key,val in params["policy"].items():
+        print(key)
+        print(val.shape)
+
+def make_new_model(config):
+    model = MaskablePPO(config["policy_type"], env, verbose=1,
+                    learning_rate=config["learning_rate"],
+                    clip_range = config["clip_range"],
+                    ent_coef = config["ent_coef"],
+                    vf_coef = config["vf_coef"],
+                    normalize_advantage = config["normalize_advantage"],
+                    n_epochs = config["n_epochs"],
+                    gamma = config["gamma"],
+                    gae_lambda = config["gae_lambda"],
+                    batch_size=config["batch_size"],
+                    policy_kwargs = config["policy_kwargs"],
+                    tensorboard_log=f"runs/{experiment_name}")
+    return model
+
+
+if __name__ == "__main__":
+    experiment_name = f"CPU_MPPO_R{config['current_round']}_{int(time.time())}"
+
+    env = make_env()
+    env = ActionMasker(env, mask_fn)
     
-    cProfile.run("model.learn(total_timesteps=100000)")
+    trained_agent = TrainedAdversary(r"models\GPU_MPPO_R8_1672685724\model")
+    
+    obs = env.reset()
+    action = trained_agent.play(obs,env.action_mask)
+    
+    print(action)
+    
+
+
+
+    
+
+    

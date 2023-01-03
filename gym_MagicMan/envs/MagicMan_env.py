@@ -528,6 +528,7 @@ class MagicManEnv(gym.Env):
                 self.r = round_reward
                 self.done = True
                 self.info[player.name] = player.current_bid-player.round_suits
+                self.info[player.name] = player.current_bid-player.round_suits
                 
             elif isinstance(player,AdversaryPlayer):
                 self.info[player.name] = player.current_bid-player.round_suits
