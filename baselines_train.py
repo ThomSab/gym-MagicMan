@@ -96,19 +96,20 @@ def print_params(model):
         print(key)
         print(val.shape)
 
-def make_new_model(config):
+def make_new_model(config,env):
     model = MaskablePPO(config["policy_type"], env, verbose=1,
-                    learning_rate=config["learning_rate"],
-                    clip_range = config["clip_range"],
-                    ent_coef = config["ent_coef"],
-                    vf_coef = config["vf_coef"],
-                    normalize_advantage = config["normalize_advantage"],
-                    n_epochs = config["n_epochs"],
-                    gamma = config["gamma"],
-                    gae_lambda = config["gae_lambda"],
-                    batch_size=config["batch_size"],
-                    policy_kwargs = config["policy_kwargs"],
-                    tensorboard_log=f"runs/{experiment_name}")
+                        seed=config["seed"],
+                        learning_rate=config["learning_rate"],
+                        clip_range = config["clip_range"],
+                        ent_coef = config["ent_coef"],
+                        vf_coef = config["vf_coef"],
+                        normalize_advantage = config["normalize_advantage"],
+                        n_epochs = config["n_epochs"],
+                        gamma = config["gamma"],
+                        gae_lambda = config["gae_lambda"],
+                        batch_size=config["batch_size"],
+                        policy_kwargs = config["policy_kwargs"],
+                        tensorboard_log=f"runs/{experiment_name}")
     return model
 
 

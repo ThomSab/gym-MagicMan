@@ -1,0 +1,376 @@
+diff --git a/gym_MagicMan/envs/MagicMan_env.py b/gym_MagicMan/envs/MagicMan_env.py
+index 94c7617..9b70430 100644
+--- a/gym_MagicMan/envs/MagicMan_env.py
++++ b/gym_MagicMan/envs/MagicMan_env.py
+@@ -8,6 +8,8 @@ import torch
+ import random
+ from collections import deque
+ 
++import pygame
++
+ from gym_MagicMan.envs.utils.MagicManPlayer import TrainPlayer,AdversaryPlayer
+ from gym_MagicMan.envs.utils.MagicManRandomAdversary import RandomAdversary
+ from gym_MagicMan.envs.utils.MagicManJulesAdversary import JulesAdversary
+@@ -15,7 +17,7 @@ import gym_MagicMan.envs.utils.MagicManDeck as deck
+ 
+ 
+ class MagicManEnv(gym.Env):
+-    metadata = {'render.modes': ['human']}
++    metadata = {'render.modes': ['human'], "render_fps": .1}
+ 
+     def __init__(self,init_state=None,adversaries='random',verbose=False,verbose_obs=False,current_round=15):
+         
+@@ -47,6 +49,7 @@ class MagicManEnv(gym.Env):
+         self.turnorder_idx = 0
+         self.bid_idx = 0
+         self.turn_cards = []
++        self.last_turn_cards = []
+         self.current_suit_idx = 5
+         self.current_suit = torch.zeros(6)
+         self.all_bid_completion = torch.zeros(self.n_players)
+@@ -114,6 +117,11 @@ class MagicManEnv(gym.Env):
+         self.info = {player.name:0 for player in self.players}
+         self.done = False
+         
++        self.window = None
++        self.clock = None
++        self.window_size = 512
++        
++        
+         self.reset()
+     
+     def get_flat(self,obs_dict):
+@@ -155,10 +163,62 @@ class MagicManEnv(gym.Env):
+         
+         return obs
+ 
+-
+-    def render(self, mode='human', close=False):
+-        raise NotImplementedError
+-        
++    def render(self,mode):
++        if mode == "human":
++            self._render_frame(mode)
++
++    def _render_frame(self,mode):
++        if self.window is None and mode == "human":
++            pygame.init()
++            pygame.display.init()
++            pygame.display.set_caption(f'Magic Man Round {self.current_round}')
++            self.font = pygame.font.SysFont('Comic Sans MS', 20)
++            self.window = pygame.display.set_mode((self.window_size, self.window_size))
++        if self.clock is None and mode == "human":
++            self.clock = pygame.time.Clock()
++
++        canvas = pygame.Surface((self.window_size, self.window_size))
++        canvas.fill((255, 255, 255))
++       
++        if mode == "human":
++            # The following line copies our drawings from `canvas` to the visible window
++            
++            self.window.blit(canvas, canvas.get_rect())
++            pygame.event.pump()
++            
++            train_player_cards_y=0
++            for card in self.train_player.cards_obj:
++                card_surface = self.font.render(str(card), False, (0, 0, 0))
++                self.window.blit(card_surface,dest=(0,train_player_cards_y))
++                train_player_cards_y+=self.font.get_linesize()      
++                
++            turn_cards_y=0
++            for card in self.turn_cards:
++                card_surface = self.font.render(str(card), False, (0, 0, 0))
++                self.window.blit(card_surface,dest=(150,turn_cards_y))
++                turn_cards_y+=self.font.get_linesize()            
++            
++            last_turn_cards_y=0
++            for card in self.last_turn_cards:
++                card_surface = self.font.render(str(card), False, (0, 0, 0))
++                self.window.blit(card_surface,dest=(300,last_turn_cards_y))
++                last_turn_cards_y+=self.font.get_linesize()
++            
++            pygame.display.update()
++
++            # We need to ensure that human-rendering occurs at the predefined framerate.
++            # The following line will automatically add a delay to keep the framerate stable.
++            self.clock.tick(self.metadata["render_fps"])
++        else:  # rgb_array
++            return np.transpose(
++                np.array(pygame.surfarray.pixels3d(canvas)), axes=(1, 0, 2)
++            )
++            
++    def close(self):
++        if self.window is not None:
++            pygame.display.quit()
++            pygame.quit()    
++                       
+     def starting_player(self,starting_player):
+         self.players.rotate(  -self.players.index(starting_player) )
+         
+@@ -186,8 +246,7 @@ class MagicManEnv(gym.Env):
+         else:
+             obs, self.r, self.done, self.info = self.bid_step(action=None,active_bid=active_bid)
+             return obs, self.r, self.done, self.info
+-            
+-            
++                        
+     def bid_step(self,action,active_bid=False): # !!not turn
+         
+         if action is not None:
+@@ -305,6 +364,7 @@ class MagicManEnv(gym.Env):
+                     if card.legal:
+                         player.turn_obs["legal_cards_tensor"][card_idx] = 1
+                         
++                        
+                 self.action_mask=player.turn_obs["legal_cards_tensor"]
+                 assert sum(self.action_mask)>0 or not player.cards_obj, f"{player} has no valid moves: {player.cards_obj}"
+ 
+@@ -343,6 +403,7 @@ class MagicManEnv(gym.Env):
+                     if self.verbose_obs:
+                         print(f"Train Player Observation: {player_obs}")
+                     dict_round_obs = player_obs
++                        
+                     return dict_round_obs, self.r, self.done, self.info
+                     
+                 else:
+@@ -407,10 +468,10 @@ class MagicManEnv(gym.Env):
+             for card_idx in range(len(self.turn_cards)):
+                 played_card = self.turn_cards[card_idx]
+                 player.turn_obs["played_cards"][card_idx][deck.deck.index(played_card)] = 1
++            self.last_turn_cards = self.turn_cards
+             
+             player.round_obs[self.turn_idx] = player.turn_obs 
+ 
+-
+     def conclude_step(self):
+         assert self.turn_idx == self.current_round, (f"Turn index is {self.turn_idx} and should be equal to Current Round [{self.current_round}]")       
+         self.state="CONCLUDE"
+@@ -442,15 +503,14 @@ class MagicManEnv(gym.Env):
+ 
+ 
+ if __name__ == "__main__":
+-    import matplotlib.pyplot as plt
+-    current_round=5
++    current_round=8
+ 
+     env = gym.make("MagicMan-v0",adversaries='jules',current_round=current_round)#,current_round=2,verbose=0,verbose_obs=0)
+     #env = gym.wrappers.FlattenObservation(env)
+ 
+     r_list = []
+     info_mean = None
+-    for _ in range(1000):
++    for _ in range(1):
+         done = False
+         obs = env.reset()
+         round_idx=0
+@@ -458,26 +518,11 @@ if __name__ == "__main__":
+             
+             assert sum(obs[round_idx]["legal_cards_tensor"])>0,f"legal cards tensor empty: {obs[turn_idx]['legal_cards_tensor']}"
+             legal_cards = torch.where(obs[round_idx]["legal_cards_tensor"]==1)[0]
+-            legal_cards = torch.where(obs[round_idx]["legal_cards_tensor"]==1)[0]
+             action = random.choice(legal_cards)
+             obs, r, done, info = env.step(action)
+             round_idx+=1
+             
+-        print(_)
+-        if not info_mean:
+-            info_mean = info
+-            for key,val in info.items():
+-                info_mean[key] = [val]
+-        else:
+-            for key,val in info.items():
+-                info_mean[key].append(val)
+-    
+-    for player,scores in info_mean.items(): 
+-        print(player)
+-        print(np.mean(scores))
+-        plt.hist(scores,bins=list(range(min(scores),max(scores))),align='mid')
+-        plt.title("player.current_bid-player.round_suits")
+-        plt.xlabel("<-- bid too low   |   bid too high --->")
+-        plt.show()
+-        
++            env.render(mode='human')
++            print("\n")
++    env.close()
+         
+diff --git a/gym_MagicMan/envs/__pycache__/MagicMan_env.cpython-39.pyc b/gym_MagicMan/envs/__pycache__/MagicMan_env.cpython-39.pyc
+index 53ee26f..bb53ba9 100644
+Binary files a/gym_MagicMan/envs/__pycache__/MagicMan_env.cpython-39.pyc and b/gym_MagicMan/envs/__pycache__/MagicMan_env.cpython-39.pyc differ
+diff --git a/gym_MagicMan/envs/utils/MagicManDeck.py b/gym_MagicMan/envs/utils/MagicManDeck.py
+index 5f69f07..5b7141b 100644
+--- a/gym_MagicMan/envs/utils/MagicManDeck.py
++++ b/gym_MagicMan/envs/utils/MagicManDeck.py
+@@ -81,8 +81,10 @@ def turn_value (cards,current_suit,trump=0): #turn value --> value is the index
+                 card.turn_value = 2*card.value + 3.5
+                 
+             else:
+-                return 'ERROR invalid card turn value'
++                raise UserWarning(f'ERROR invalid card turn value for {str(card)}')
++                return
+         else:
++            raise UserWarning(f'ERROR invalid card turn value for {str(card)}')
+             card.turn_value = 'N/A' #to be disregarded
+ 
+ 
+@@ -106,17 +108,16 @@ def hand_turn_value(player_idx,hand_cards,current_suit,trump=0):
+                 card.turn_value = 2*card.value + 3.5
+                 
+             else:
+-                return 'ERROR invalid card turn value'
++                raise UserWarning (f'ERROR invalid card turn value for {str(card)}')
++                return 
+         else:
+-            print("not legal")
+-            card.turn_value = 'N/A' #to be disregarded 
++            #print(f"{str(card)}'s turn value is not accounted for")
++            card.turn_value = 0 #to be disregarded 
+ 
+             
+  
+ def legal (played,hand,trump=0): #legal to play in this turn --> wich cards are allowed and which aren't
+ 
+-    hand = [deck[_] for _ in hand if _==1]
+-
+     for card in hand:
+         card.legal = True
+ 
+@@ -138,17 +139,24 @@ def legal (played,hand,trump=0): #legal to play in this turn --> wich cards are
+         else:#the suit is empty
+             foolean = False#bool is set to false to end the loop
+             
+-
++    print("suit is ",suit)
+     if suit in [0,1,2,3] and suit not in [4,5]:
+         for card in hand:
+             if card.color == suit:
+                 can_serve_suit = True
++                print("can serve suit")
+                 
+         if can_serve_suit:
+             for card in hand:
+                 if card.color != suit and card.color not in [4,5]: #magic men and jesters are always legal
+                     card.legal = False
+-	
++                    
++    print("\n\nplayed cards:")
++    for card in played:
++        print(str(card))
++    print("\ncards in hand:")
++    for card in hand:                
++        print(str(card), f" legal is {card.legal}")
+     return suit
+ 
+ def net_arr_trans(list_arg,length):#network array transform
+diff --git a/gym_MagicMan/envs/utils/MagicManJulesAdversary.py b/gym_MagicMan/envs/utils/MagicManJulesAdversary.py
+index 7440de5..b761fce 100644
+--- a/gym_MagicMan/envs/utils/MagicManJulesAdversary.py
++++ b/gym_MagicMan/envs/utils/MagicManJulesAdversary.py
+@@ -10,6 +10,55 @@ class JulesAdversary(AdversaryPlayer):
+ 
+ 
+     """
++    Round 2
++    AdversaryPlayer622424
++    0.2178
++    AdversaryPlayer825622
++    0.2386
++    AdversaryPlayer824997
++    0.2222
++    
++    Round 3
++    AdversaryPlayer854383
++    0.0857
++    AdversaryPlayer636705
++    0.0665
++    AdversaryPlayer251647
++    0.0968
++    TrainPlayer727031
++    0.1223
++    
++    Round 6
++    AdversaryPlayer699149
++    -0.0891
++    AdversaryPlayer342757
++    -0.09
++    AdversaryPlayer145428
++    -0.0896
++    TrainPlayer121391
++    0.0071
++    
++    Round 10
++    TrainPlayer177419
++    -1.6445
++    AdversaryPlayer637333
++    -0.2177
++    AdversaryPlayer343616
++    -0.2162
++    AdversaryPlayer992781
++    -0.2162
++    
++    Round 15
++    AdversaryPlayer274368
++    -0.302
++    AdversaryPlayer153045
++    -0.3189
++    TrainPlayer118756
++    -1.7445
++    AdversaryPlayer947529
++    -0.3066
++    
++    
+     player.round_obs = {_:
+                             {
+                                 "norm_bids"                  : torch.zeros(self.n_players),
+@@ -79,7 +128,7 @@ class JulesAdversary(AdversaryPlayer):
+         
+         
+         
+-        cards_value_dict = {card:card.turn_value for card in self.cards_obj}
++        cards_value_dict = {card:card.turn_value for card in self.cards_obj if card.legal}
+         
+         max_val_played=0
+         if played_cards_obj:
+@@ -89,11 +138,15 @@ class JulesAdversary(AdversaryPlayer):
+         
+         
+         
+-        if self.mode == "GET_SUITS" and can_take_suit:
+-            maxval_card = max(cards_value_dict, key=cards_value_dict.get)
+-            return deck.deck.index(maxval_card)
++        if self.mode == "GET_SUITS":
++            if can_take_suit:
++                maxval_card = max(cards_value_dict, key=cards_value_dict.get)
++                return deck.deck.index(maxval_card)
++            else:
++                minval_card = min(cards_value_dict, key=cards_value_dict.get)
++                return deck.deck.index(minval_card)
+             
+-        elif self.mode == "STOP_SUITS" or not can_take_suit:
++        elif self.mode == "STOP_SUITS":
+             if max_val_played>0:
+                 win_cards = [key for key,val in cards_value_dict.items() if val>max_val_played]
+                 if len(win_cards)<len(cards_value_dict.values()):
+@@ -112,12 +165,12 @@ class JulesAdversary(AdversaryPlayer):
+         # dont be a fool with the fool
+         # play the wizards on the valuable piles
+         
+-        # wenn keine stiche mehr bitte:
+-        #   moeglichst hohe karten unter gewinnen spielen
+         
+         # karten zaehlen
+     
+ 
+ 
+     def clean_hand(self):
+-        self.cards = []  
+\ No newline at end of file
++        self.cards = []  
++        
++    
+\ No newline at end of file
+diff --git a/gym_MagicMan/envs/utils/__pycache__/MagicManDeck.cpython-39.pyc b/gym_MagicMan/envs/utils/__pycache__/MagicManDeck.cpython-39.pyc
+index e784ee5..45989e5 100644
+Binary files a/gym_MagicMan/envs/utils/__pycache__/MagicManDeck.cpython-39.pyc and b/gym_MagicMan/envs/utils/__pycache__/MagicManDeck.cpython-39.pyc differ
+diff --git a/gym_MagicMan/envs/utils/__pycache__/MagicManJulesAdversary.cpython-39.pyc b/gym_MagicMan/envs/utils/__pycache__/MagicManJulesAdversary.cpython-39.pyc
+index 1cd7b18..304f8a4 100644
+Binary files a/gym_MagicMan/envs/utils/__pycache__/MagicManJulesAdversary.cpython-39.pyc and b/gym_MagicMan/envs/utils/__pycache__/MagicManJulesAdversary.cpython-39.pyc differ

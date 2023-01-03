@@ -1,0 +1,1890 @@
+C:\Users\jasper\AppData\Local\Programs\Python\Python39\lib\site-packages\gym\spaces\box.py:73: UserWarning: [33mWARN: Box bound precision lowered by casting to float32
+  logger.warn(
+pygame 2.1.2 (SDL 2.0.18, Python 3.9.1)
+Hello from the pygame community. https://www.pygame.org/contribute.html
+Bids are predetermined in this environment. --> see 'active bid' flag
+Bid input is not ordered. Has to be implemented in the future.
+suit is  5
+played cards:
+cards in hand:
+Yellow 12  legal is True
+Green 12  legal is True
+suit is  5
+played cards:
+cards in hand:
+Yellow 12  legal is True
+Green 12  legal is True
+suit is  1
+can serve suit
+played cards:
+Yellow 12
+cards in hand:
+Yellow 6  legal is True
+Red 3  legal is False
+suit is  1
+can serve suit
+played cards:
+Yellow 12
+cards in hand:
+Yellow 6  legal is True
+Red 3  legal is False
+suit is  1
+played cards:
+Yellow 12
+Yellow 6
+cards in hand:
+Blue 5  legal is True
+Blue 11  legal is True
+Using cpu device
+Wrapping the env in a DummyVecEnv.
+suit is  5
+played cards:
+cards in hand:
+Red 7  legal is True
+Green 9  legal is True
+suit is  5
+played cards:
+cards in hand:
+Red 7  legal is True
+Green 9  legal is True
+suit is  0
+played cards:
+Red 7
+cards in hand:
+Yellow 7  legal is True
+Yellow 1  legal is True
+Logging to runs/CPU_MPPO_R2_1672173090\PPO_1
+suit is  0
+played cards:
+Red 7
+Yellow 7
+cards in hand:
+Yellow 9  legal is True
+Blue 2  legal is True
+suit is  0
+played cards:
+Red 7
+Yellow 7
+cards in hand:
+Yellow 9  legal is True
+Blue 2  legal is True
+suit is  0
+played cards:
+Red 7
+Yellow 7
+Yellow 9
+cards in hand:
+Blue 1  legal is True
+Blue 4  legal is True
+suit is  0
+played cards:
+Red 7
+Yellow 7
+Yellow 9
+cards in hand:
+Blue 1  legal is True
+Blue 4  legal is True
+suit is  0
+played cards:
+Red 7
+Yellow 7
+Yellow 9
+Blue 4
+cards in hand:
+Green 9  legal is True
+suit is  0
+played cards:
+Red 7
+Yellow 7
+Yellow 9
+Blue 4
+cards in hand:
+Yellow 1  legal is True
+suit is  0
+played cards:
+Red 7
+Yellow 7
+Yellow 9
+Blue 4
+cards in hand:
+Blue 2  legal is True
+suit is  0
+played cards:
+Red 7
+Yellow 7
+Yellow 9
+Blue 4
+cards in hand:
+Blue 1  legal is True
+suit is  5
+played cards:
+cards in hand:
+Green 9  legal is True
+suit is  5
+played cards:
+cards in hand:
+Green 9  legal is True
+suit is  3
+played cards:
+Green 9
+cards in hand:
+Yellow 1  legal is True
+suit is  3
+played cards:
+Green 9
+Yellow 1
+cards in hand:
+Blue 2  legal is True
+suit is  3
+played cards:
+Green 9
+Yellow 1
+cards in hand:
+Blue 2  legal is True
+suit is  3
+played cards:
+Green 9
+Yellow 1
+Blue 2
+cards in hand:
+Blue 1  legal is True
+suit is  3
+played cards:
+Green 9
+Yellow 1
+Blue 2
+cards in hand:
+Blue 1  legal is True
+suit is  3
+played cards:
+Green 9
+Yellow 1
+Blue 2
+Blue 1
+cards in hand:
+suit is  3
+played cards:
+Green 9
+Yellow 1
+Blue 2
+Blue 1
+cards in hand:
+suit is  3
+played cards:
+Green 9
+Yellow 1
+Blue 2
+Blue 1
+cards in hand:
+suit is  3
+played cards:
+Green 9
+Yellow 1
+Blue 2
+Blue 1
+cards in hand:
+suit is  5
+played cards:
+cards in hand:
+Red 5  legal is True
+Blue 11  legal is True
+suit is  5
+played cards:
+cards in hand:
+Red 5  legal is True
+Blue 11  legal is True
+suit is  0
+played cards:
+Red 5
+cards in hand:
+Yellow 10  legal is True
+Green 1  legal is True
+suit is  0
+played cards:
+Red 5
+cards in hand:
+Yellow 10  legal is True
+Green 1  legal is True
+suit is  0
+can serve suit
+played cards:
+Red 5
+Yellow 10
+cards in hand:
+Red 1  legal is True
+Blue 3  legal is False
+suit is  0
+can serve suit
+played cards:
+Red 5
+Yellow 10
+cards in hand:
+Red 1  legal is True
+Blue 3  legal is False
+suit is  0
+played cards:
+Red 5
+Yellow 10
+Red 1
+cards in hand:
+Green 4  legal is True
+Blue 4  legal is True
+suit is  0
+played cards:
+Red 5
+Yellow 10
+Red 1
+Blue 4
+cards in hand:
+Blue 11  legal is True
+suit is  0
+played cards:
+Red 5
+Yellow 10
+Red 1
+Blue 4
+cards in hand:
+Green 1  legal is True
+suit is  0
+played cards:
+Red 5
+Yellow 10
+Red 1
+Blue 4
+cards in hand:
+Blue 3  legal is True
+suit is  0
+played cards:
+Red 5
+Yellow 10
+Red 1
+Blue 4
+cards in hand:
+Green 4  legal is True
+suit is  5
+played cards:
+cards in hand:
+Blue 11  legal is True
+suit is  5
+played cards:
+cards in hand:
+Blue 11  legal is True
+suit is  2
+played cards:
+Blue 11
+cards in hand:
+Green 1  legal is True
+suit is  2
+played cards:
+Blue 11
+suit is  0and:
+Green 1  legal is True
+suit is  2
+can serve suit
+played cards:
+Blue 11
+Green 1
+cards in hand:
+Blue 3  legal is True
+suit is  2
+can serve suit
+played cards:
+Blue 11
+Green 1
+cards in hand:
+Blue 3  legal is True
+suit is  2
+played cards:
+Blue 11
+Green 1
+Blue 3
+cards in hand:
+Green 4  legal is True
+suit is  2
+played cards:
+Blue 11
+Green 1
+Blue 3
+Green 4
+cards in hand:
+suit is  2
+played cards:
+Blue 11
+Green 1
+Blue 3
+Green 4
+cards in hand:
+suit is  2
+played cards:
+Blue 11
+Green 1
+Blue 3
+Green 4
+cards in hand:
+suit is  2
+played cards:
+Blue 11
+Green 1
+Blue 3
+Green 4
+cards in hand:
+suit is  5
+played cards:
+cards in hand:
+Red 8  legal is True
+Blue 4  legal is True
+suit is  5
+played cards:
+cards in hand:
+Red 8  legal is True
+Blue 4  legal is True
+suit is  0
+played cards:
+Red 8
+cards in hand:
+Blue 7  legal is True
+Green 6  legal is True
+suit is  0
+played cards:
+Red 8
+Green 6
+cards in hand:
+Blue 11  legal is True
+Blue 3  legal is True
+suit is  0
+played cards:
+Red 8
+Green 6
+cards in hand:
+Blue 11  legal is True
+Blue 3  legal is True
+suit is  0
+can serve suit
+played cards:
+Red 8
+Green 6
+Blue 11
+cards in hand:
+Red 6  legal is True
+Green 7  legal is False
+suit is  0
+can serve suit
+played cards:
+Red 8
+Green 6
+Blue 11
+cards in hand:
+Red 6  legal is True
+Green 7  legal is False
+suit is  0
+played cards:
+Red 8
+Green 6
+Blue 11
+Red 6
+cards in hand:
+Blue 4  legal is True
+suit is  0
+played cards:
+Red 8
+Green 6
+Blue 11
+Red 6
+cards in hand:
+Blue 7  legal is True
+suit is  0
+played cards:
+Red 8
+Green 6
+Blue 11
+Red 6
+cards in hand:
+Blue 3  legal is True
+suit is  0
+played cards:
+Red 8
+Green 6
+Blue 11
+Red 6
+cards in hand:
+Green 7  legal is True
+suit is  5
+played cards:
+cards in hand:
+Blue 4  legal is True
+suit is  5
+played cards:
+cards in hand:
+Blue 4  legal is True
+suit is  2
+can serve suit
+played cards:
+Blue 4
+cards in hand:
+Blue 7  legal is True
+suit is  2
+can serve suit
+played cards:
+Blue 4
+Blue 7
+cards in hand:
+Blue 3  legal is True
+suit is  2
+can serve suit
+played cards:
+Blue 4
+Blue 7
+cards in hand:
+Blue 3  legal is True
+suit is  2
+played cards:
+Blue 4
+Blue 7
+Blue 3
+cards in hand:
+Green 7  legal is True
+suit is  2
+played cards:
+Blue 4
+Blue 7
+Blue 3
+cards in hand:
+Green 7  legal is True
+suit is  2
+played cards:
+Blue 4
+Blue 7
+Blue 3
+Green 7
+cards in hand:
+suit is  2
+played cards:
+Blue 4
+Blue 7
+Blue 3
+Green 7
+cards in hand:
+suit is  2
+played cards:
+Blue 4
+Blue 7
+Blue 3
+Green 7
+cards in hand:
+suit is  2
+played cards:
+Blue 4
+Blue 7
+Blue 3
+Green 7
+cards in hand:
+suit is  5
+played cards:
+cards in hand:
+Red 9  legal is True
+Red 3  legal is True
+suit is  5
+played cards:
+cards in hand:
+Red 9  legal is True
+Red 3  legal is True
+suit is  0and:
+played cards:
+Red 9
+cards in hand:
+Blue 12  legal is True
+Yellow Magic Man  legal is True
+suit is  0
+played cards:
+Red 9
+cards in hand:
+Blue 12  legal is True
+Yellow Magic Man  legal is True
+suit is  0
+can serve suit
+played cards:
+Red 9
+Yellow Magic Man
+cards in hand:
+Red 13  legal is True
+Blue Fool  legal is True
+suit is  0
+can serve suit
+played cards:
+Red 9
+Yellow Magic Man
+cards in hand:
+Red 13  legal is True
+Blue Fool  legal is True
+suit is  0
+played cards:
+Red 9
+Yellow Magic Man
+Blue Fool
+cards in hand:
+Green 1  legal is True
+Green 13  legal is True
+suit is  0
+can serve suit
+played cards:
+Red 9
+Yellow Magic Man
+Blue Fool
+Green 1
+cards in hand:
+Red 3  legal is True
+suit is  0
+played cards:
+Red 9
+Yellow Magic Man
+Blue Fool
+Green 1
+cards in hand:
+Blue 12  legal is True
+suit is  0
+can serve suit
+played cards:
+Red 9
+Yellow Magic Man
+Blue Fool
+Green 1
+cards in hand:
+Red 13  legal is True
+suit is  0
+played cards:
+Red 9
+Yellow Magic Man
+Blue Fool
+Green 1
+cards in hand:
+Green 13  legal is True
+suit is  5
+played cards:
+cards in hand:
+Blue 12  legal is True
+suit is  5
+played cards:
+cards in hand:
+Blue 12  legal is True
+suit is  2
+played cards:
+Blue 12
+cards in hand:
+Red 13  legal is True
+suit is  2
+played cards:
+Blue 12
+cards in hand:
+Red 13  legal is True
+suit is  2
+played cards:
+Blue 12
+Red 13
+cards in hand:
+Green 13  legal is True
+suit is  2
+played cards:
+Blue 12
+Red 13
+Green 13
+cards in hand:
+Red 3  legal is True
+suit is  2
+played cards:
+Blue 12
+Red 13
+Green 13
+cards in hand:
+Red 3  legal is True
+suit is  2
+played cards:
+Blue 12
+Red 13
+Green 13
+Red 3
+cards in hand:
+suit is  2
+played cards:
+Blue 12
+Red 13
+Green 13
+Red 3
+cards in hand:
+suit is  2
+played cards:
+Blue 12
+Red 13
+Green 13
+Red 3
+cards in hand:
+suit is  2
+played cards:
+Blue 12
+Red 13
+Green 13
+Red 3
+cards in hand:
+suit is  5
+played cards:
+cards in hand:
+Yellow Magic Man  legal is True
+Blue 8  legal is True
+suit is  5
+played cards:
+cards in hand:
+Yellow Magic Man  legal is True
+Blue 8  legal is True
+suit is  4
+played cards:
+Yellow Magic Man
+cards in hand:
+Yellow 6  legal is True
+Blue 10  legal is True
+suit is  4
+played cards:
+Yellow Magic Man
+cards in hand:
+Yellow 6  legal is True
+Blue 10  legal is True
+suit is  4
+played cards:
+Yellow Magic Man
+Blue 10
+cards in hand:
+Green 12  legal is True
+Green 4  legal is True
+suit is  4
+played cards:
+Yellow Magic Man
+Blue 10
+cards in hand:
+Green 12  legal is True
+Green 4  legal is True
+suit is  4
+played cards:
+Yellow Magic Man
+Blue 10
+Green 12
+cards in hand:
+Yellow 1  legal is True
+Blue 4  legal is True
+suit is  4
+played cards:
+Yellow Magic Man
+Blue 10
+Green 12
+Yellow 1
+cards in hand:
+Blue 8  legal is True
+suit is  4
+played cards:
+Yellow Magic Man
+Blue 10
+Green 12
+Yellow 1
+cards in hand:
+Yellow 6  legal is True
+suit is  4
+played cards:
+Yellow Magic Man
+Blue 10
+Green 12
+Yellow 1
+cards in hand:
+Green 4  legal is True
+suit is  4
+played cards:
+Yellow Magic Man
+Blue 10
+Green 12
+Yellow 1
+cards in hand:
+Blue 4  legal is True
+suit is  5
+played cards:
+cards in hand:
+Blue 8  legal is True
+suit is  5
+played cards:
+cards in hand:
+Blue 8  legal is True
+suit is  2
+played cards:
+Blue 8
+cards in hand:
+Yellow 6  legal is True
+suit is  2
+played cards:
+Blue 8
+cards in hand:
+Yellow 6  legal is True
+suit is  2
+played cards:
+Blue 8
+Yellow 6
+cards in hand:
+Green 4  legal is True
+suit is  2
+played cards:
+Blue 8
+Yellow 6
+cards in hand:
+Green 4  legal is True
+suit is  2
+can serve suit
+played cards:
+Blue 8
+Yellow 6
+Green 4
+cards in hand:
+Blue 4  legal is True
+suit is  2
+played cards:
+Blue 8
+Yellow 6
+Green 4
+Blue 4
+cards in hand:
+suit is  2
+played cards:
+Blue 8
+Yellow 6
+Green 4
+Blue 4
+cards in hand:
+suit is  2
+played cards:
+Blue 8
+Yellow 6
+Green 4
+Blue 4
+cards in hand:
+suit is  2
+played cards:
+Blue 8
+Yellow 6
+Green 4
+Blue 4
+cards in hand:
+suit is  5
+played cards:
+cards in hand:
+Red 5  legal is True
+Red 2  legal is True
+suit is  0
+played cards:
+Red 2
+cards in hand:
+Blue 6  legal is True
+Yellow 11  legal is True
+suit is  0
+played cards:
+Red 2
+cards in hand:
+Blue 6  legal is True
+Yellow 11  legal is True
+suit is  0
+played cards:
+Red 2
+Yellow 11
+cards in hand:
+Green 9  legal is True
+Yellow Magic Man  legal is True
+suit is  0
+played cards:
+Red 2
+Yellow 11
+cards in hand:
+Green 9  legal is True
+Yellow Magic Man  legal is True
+suit is  0
+can serve suit
+played cards:
+Red 2
+Yellow 11
+Yellow Magic Man
+cards in hand:
+Green 10  legal is False
+Red 4  legal is True
+suit is  0
+can serve suit
+played cards:
+Red 2
+Yellow 11
+Yellow Magic Man
+cards in hand:
+Green 10  legal is False
+Red 4  legal is True
+suit is  0
+can serve suit
+played cards:
+Red 2
+Yellow 11
+Yellow Magic Man
+Red 4
+cards in hand:
+Red 5  legal is True
+suit is  0
+played cards:
+Red 2
+Yellow 11
+Yellow Magic Man
+Red 4
+cards in hand:
+Blue 6  legal is True
+suit is  0
+played cards:
+Red 2
+Yellow 11
+Yellow Magic Man
+Red 4
+cards in hand:
+Green 9  legal is True
+suit is  0
+played cards:
+Red 2
+Yellow 11
+Yellow Magic Man
+Red 4
+cards in hand:
+Green 10  legal is True
+suit is  5
+played cards:
+cards in hand:
+Green 9  legal is True
+suit is  5
+played cards:
+cards in hand:
+Green 9  legal is True
+suit is  3
+can serve suit
+played cards:
+Green 9
+cards in hand:
+Green 10  legal is True
+suit is  3
+can serve suit
+played cards:
+Green 9
+cards in hand:
+Green 10  legal is True
+suit is  3
+played cards:
+Green 9
+Green 10
+cards in hand:
+Red 5  legal is True
+suit is  3
+played cards:
+Green 9
+Green 10
+Red 5
+cards in hand:
+Blue 6  legal is True
+suit is  3
+played cards:
+Green 9
+Green 10
+Red 5
+cards in hand:
+Blue 6  legal is True
+suit is  3
+played cards:
+Green 9
+Green 10
+Red 5
+Blue 6
+cards in hand:
+suit is  3
+played cards:
+Green 9
+Green 10
+Red 5
+Blue 6
+cards in hand:
+suit is  3
+played cards:
+Green 9
+Green 10
+Red 5
+Blue 6
+cards in hand:
+suit is  3
+played cards:
+Green 9
+Green 10
+Red 5
+Blue 6
+cards in hand:
+suit is  5
+played cards:
+cards in hand:
+Red 1  legal is True
+Green 11  legal is True
+suit is  5
+played cards:
+cards in hand:
+Red 1  legal is True
+Green 11  legal is True
+suit is  0
+played cards:
+Red 1
+cards in hand:
+Blue 4  legal is True
+Blue 6  legal is True
+suit is  0
+played cards:
+Red 1
+Blue 4
+cards in hand:
+Blue 13  legal is True
+Red Magic Man  legal is True
+suit is  0
+played cards:
+Red 1
+Blue 4
+cards in hand:
+Blue 13  legal is True
+Red Magic Man  legal is True
+suit is  0
+played cards:
+Red 1
+Blue 4
+Red Magic Man
+cards in hand:
+Blue Magic Man  legal is True
+Red Fool  legal is True
+suit is  0
+played cards:
+Red 1
+Blue 4
+Red Magic Man
+cards in hand:
+Blue Magic Man  legal is True
+Red Fool  legal is True
+suit is  0
+played cards:
+Red 1
+Blue 4
+Red Magic Man
+Red Fool
+cards in hand:
+Green 11  legal is True
+suit is  0
+played cards:
+Red 1
+Blue 4
+Red Magic Man
+Red Fool
+cards in hand:
+Blue 6  legal is True
+suit is  0
+played cards:
+Red 1
+Blue 4
+Red Magic Man
+Red Fool
+cards in hand:
+Blue 13  legal is True
+suit is  0
+played cards:
+Red 1
+Blue 4
+Red Magic Man
+Red Fool
+cards in hand:
+Blue Magic Man  legal is True
+suit is  5
+played cards:
+cards in hand:
+Blue 13  legal is True
+suit is  5
+played cards:
+cards in hand:
+Blue 13  legal is True
+suit is  2
+played cards:
+Blue 13
+cards in hand:
+Blue Magic Man  legal is True
+suit is  2
+played cards:
+Blue 13
+cards in hand:
+Blue Magic Man  legal is True
+suit is  2
+played cards:
+Blue 13
+Blue Magic Man
+cards in hand:
+Green 11  legal is True
+suit is  2
+played cards:
+Blue 13
+Blue Magic Man
+cards in hand:
+Green 11  legal is True
+suit is  2
+can serve suit
+played cards:
+Blue 13
+Blue Magic Man
+Green 11
+cards in hand:
+Blue 6  legal is True
+suit is  2
+played cards:
+Blue 13
+Blue Magic Man
+Green 11
+Blue 6
+cards in hand:
+suit is  2
+played cards:
+Blue 13
+Blue Magic Man
+Green 11
+Blue 6
+cards in hand:
+suit is  2
+played cards:
+Blue 13
+Blue Magic Man
+Green 11
+Blue 6
+cards in hand:
+suit is  2
+played cards:
+Blue 13
+Blue Magic Man
+Green 11
+Blue 6
+cards in hand:
+suit is  5
+played cards:
+cards in hand:
+Green 11  legal is True
+Red 11  legal is True
+suit is  5
+played cards:
+cards in hand:
+Green 11  legal is True
+Red 11  legal is True
+suit is  0
+played cards:
+Red 11
+cards in hand:
+Yellow 7  legal is True
+Green 1  legal is True
+suit is  0
+played cards:
+Red 11
+Green 1
+cards in hand:
+Blue Magic Man  legal is True
+Green 12  legal is True
+suit is  0
+played cards:
+Red 11
+Green 1
+cards in hand:
+Blue Magic Man  legal is True
+Green 12  legal is True
+suit is  0
+played cards:
+Red 11
+Green 1
+Blue Magic Man
+cards in hand:
+Blue 4  legal is True
+Blue 13  legal is True
+suit is  0
+played cards:
+Red 11
+Green 1
+Blue Magic Man
+cards in hand:
+Blue 4  legal is True
+Blue 13  legal is True
+suit is  0
+played cards:
+Red 11
+Green 1
+Blue Magic Man
+Blue 13
+cards in hand:
+Green 11  legal is True
+suit is  0
+played cards:
+Red 11
+Green 1
+Blue Magic Man
+Blue 13
+cards in hand:
+Yellow 7  legal is True
+suit is  0
+played cards:
+Red 11
+Green 1
+Blue Magic Man
+Blue 13
+cards in hand:
+Green 12  legal is True
+suit is  0
+played cards:
+Red 11
+Green 1
+Blue Magic Man
+Blue 13
+cards in hand:
+Blue 4  legal is True
+suit is  5
+played cards:
+cards in hand:
+Green 12  legal is True
+suit is  5
+played cards:
+cards in hand:
+Green 12  legal is True
+suit is  3
+played cards:
+Green 12
+cards in hand:
+Blue 4  legal is True
+suit is  3
+played cards:
+Green 12
+cards in hand:
+Blue 4  legal is True
+suit is  3
+can serve suit
+played cards:
+Green 12
+Blue 4
+cards in hand:
+Green 11  legal is True
+suit is  3
+can serve suit
+played cards:
+Green 12
+Blue 4
+cards in hand:
+Green 11  legal is True
+suit is  3
+played cards:
+Green 12
+Blue 4
+Green 11
+cards in hand:
+Yellow 7  legal is True
+suit is  3
+played cards:
+Green 12
+Blue 4
+Green 11
+Yellow 7
+cards in hand:
+suit is  3
+played cards:
+Green 12
+Blue 4
+Green 11
+Yellow 7
+cards in hand:
+suit is  3
+played cards:
+Green 12
+Blue 4
+Green 11
+Yellow 7
+cards in hand:
+suit is  3
+played cards:
+Green 12
+Blue 4
+Green 11
+Yellow 7
+cards in hand:
+suit is  5
+played cards:
+cards in hand:
+Red 7  legal is True
+Yellow 5  legal is True
+suit is  1
+can serve suit
+played cards:
+Yellow 5
+cards in hand:
+Yellow 3  legal is True
+Red 6  legal is False
+suit is  1
+can serve suit
+played cards:
+Yellow 5
+cards in hand:
+Yellow 3  legal is True
+Red 6  legal is False
+suit is  1
+can serve suit
+played cards:
+Yellow 5
+Yellow 3
+cards in hand:
+Yellow 11  legal is True
+Green 9  legal is False
+suit is  1
+can serve suit
+played cards:
+Yellow 5
+Yellow 3
+cards in hand:
+Yellow 11  legal is True
+Green 9  legal is False
+suit is  1
+played cards:
+Yellow 5
+Yellow 3
+Yellow 11
+cards in hand:
+Blue 2  legal is True
+Red 11  legal is True
+suit is  1
+Green 4
+played cards:
+Yellow 5
+Yellow 3
+Yellow 11
+cards in hand:
+Blue 2  legal is True
+Red 11  legal is True
+suit is  1
+played cards:
+Yellow 5
+Yellow 3
+Yellow 11
+Red 11
+cards in hand:
+Red 7  legal is True
+suit is  1
+played cards:
+Yellow 5
+Yellow 3
+Yellow 11
+Red 11
+cards in hand:
+Red 6  legal is True
+suit is  1
+played cards:
+Yellow 5
+Yellow 3
+Yellow 11
+Red 11
+cards in hand:
+Green 9  legal is True
+suit is  1
+played cards:
+Yellow 5
+Yellow 3
+Yellow 11
+Red 11
+cards in hand:
+Blue 2  legal is True
+suit is  5
+played cards:
+cards in hand:
+Blue 2  legal is True
+suit is  5
+played cards:
+cards in hand:
+Blue 2  legal is True
+suit is  2
+played cards:
+Blue 2
+cards in hand:
+Red 7  legal is True
+suit is  2
+played cards:
+Blue 2
+Red 7
+cards in hand:
+Red 6  legal is True
+suit is  2
+played cards:
+Blue 2
+Red 7
+cards in hand:
+Red 6  legal is True
+suit is  2
+played cards:
+Blue 2
+Red 7
+Red 6
+cards in hand:
+Green 9  legal is True
+suit is  2
+played cards:
+Blue 2
+Red 7
+Red 6
+cards in hand:
+Green 9  legal is True
+suit is  2
+played cards:
+Blue 2
+Red 7
+Red 6
+Green 9
+cards in hand:
+suit is  2
+played cards:
+Blue 2
+Red 7
+Red 6
+Green 9
+cards in hand:
+suit is  2
+played cards:
+Blue 2
+Red 7
+Red 6
+Green 9
+cards in hand:
+suit is  2
+played cards:
+Blue 2
+Red 7
+Red 6
+Green 9
+cards in hand:
+suit is  5
+played cards:
+cards in hand:
+Blue 8  legal is True
+Blue 4  legal is True
+suit is  2
+played cards:
+Blue 8
+cards in hand:
+Red 8  legal is True
+Green 4  legal is True
+suit is  2
+played cards:
+Blue 8
+cards in hand:
+Red 8  legal is True
+Green 4  legal is True
+suit is  2
+played cards:
+Blue 8
+Red 8
+cards in hand:
+Red 5  legal is True
+Red 4  legal is True
+suit is  2
+played cards:
+Blue 8
+Red 8
+cards in hand:
+Red 5  legal is True
+Red 4  legal is True
+suit is  2
+played cards:
+Blue 8
+Red 8
+Red 4
+cards in hand:
+Yellow 8  legal is True
+Yellow Magic Man  legal is True
+suit is  2
+played cards:
+Blue 8
+Red 8
+Red 4
+cards in hand:
+Yellow 8  legal is True
+Yellow Magic Man  legal is True
+suit is  2
+can serve suit
+played cards:
+Blue 8
+Red 8
+Red 4
+Yellow Magic Man
+cards in hand:
+Blue 4  legal is True
+suit is  2
+played cards:
+Blue 8
+Red 8
+Red 4
+Yellow Magic Man
+cards in hand:
+Green 4  legal is True
+suit is  2
+played cards:
+Blue 8
+Red 8
+Red 4
+Yellow Magic Man
+cards in hand:
+Red 5  legal is True
+suit is  2
+played cards:
+Blue 8
+Red 8
+Red 4
+Yellow Magic Man
+cards in hand:
+Yellow 8  legal is True
+suit is  5
+played cards:
+cards in hand:
+Yellow 8  legal is True
+suit is  5
+played cards:
+cards in hand:
+Yellow 8  legal is True
+suit is  1
+played cards:
+Yellow 8
+cards in hand:
+Blue 4  legal is True
+suit is  1
+played cards:
+Yellow 8
+Blue 4
+cards in hand:
+Green 4  legal is True
+suit is  1
+played cards:
+Yellow 8
+Blue 4
+cards in hand:
+Green 4  legal is True
+suit is  1
+played cards:
+Yellow 8
+Blue 4
+Green 4
+cards in hand:
+Red 5  legal is True
+suit is  1
+played cards:
+Yellow 8
+Blue 4
+Green 4
+cards in hand:
+Red 5  legal is True
+suit is  1
+played cards:
+Yellow 8
+Blue 4
+Green 4
+Red 5
+cards in hand:
+suit is  1
+played cards:
+Yellow 8
+Blue 4
+Green 4
+Red 5
+cards in hand:
+suit is  1
+played cards:
+Yellow 8
+Blue 4
+Green 4
+Red 5
+cards in hand:
+suit is  1
+played cards:
+Yellow 8
+Blue 4
+Green 4
+Red 5
+cards in hand:
+suit is  5
+played cards:
+cards in hand:
+Yellow 7  legal is True
+Yellow 5  legal is True
+suit is  5
+played cards:
+cards in hand:
+Yellow 7  legal is True
+Yellow 5  legal is True
+suit is  1
+played cards:
+Yellow 5
+cards in hand:
+Red 12  legal is True
+Blue 10  legal is True
+suit is  1
+played cards:
+Yellow 5
+cards in hand:
+Red 12  legal is True
+Blue 10  legal is True
+suit is  1
+played cards:
+Yellow 5
+Red 12
+cards in hand:
+Blue 12  legal is True
+Yellow Magic Man  legal is True
+suit is  1
+played cards:
+Yellow 5
+Red 12
+cards in hand:
+Blue 12  legal is True
+Yellow Magic Man  legal is True
+suit is  1
+played cards:
+Yellow 5
+Red 12
+Yellow Magic Man
+cards in hand:
+Green 10  legal is True
+Red 8  legal is True
+suit is  1
+can serve suit
+played cards:
+Yellow 5
+Red 12
+Yellow Magic Man
+Green 10
+cards in hand:
+Yellow 7  legal is True
+suit is  1
+played cards:
+Yellow 5
+Red 12
+Yellow Magic Man
+Green 10
+cards in hand:
+Blue 10  legal is True
+suit is  1
+played cards:
+Yellow 5
+Red 12
+Yellow Magic Man
+Green 10
+cards in hand:
+Blue 12  legal is True
+suit is  1
+played cards:
+Yellow 5
+Red 12
+Yellow Magic Man
+Green 10
+cards in hand:
+Red 8  legal is True
+suit is  5
+played cards:
+cards in hand:
+Blue 12  legal is True
+suit is  5
+played cards:
+cards in hand:
+Blue 12  legal is True
+suit is  2
+played cards:
+Blue 12
+cards in hand:
+Red 8  legal is True
+suit is  2
+played cards:
+Blue 12
+Red 8
+cards in hand:
+Yellow 7  legal is True
+suit is  2
+played cards:
+Blue 12
+Red 8
+cards in hand:
+Yellow 7  legal is True
+suit is  2
+can serve suit
+played cards:
+Blue 12
+Red 8
+Yellow 7
+cards in hand:
+Blue 10  legal is True
+suit is  2
+can serve suit
+played cards:
+Blue 12
+Red 8
+Yellow 7
+cards in hand:
+Blue 10  legal is True
+suit is  2
+played cards:
+Blue 12
+Red 8
+Yellow 7
+Blue 10
+cards in hand:
+suit is  2
+played cards:
+Blue 12
+Red 8
+Yellow 7
+Blue 10
+cards in hand:
+suit is  2
+played cards:
+Blue 12
+Red 8
+Yellow 7
+Blue 10
+cards in hand:
+suit is  2
+played cards:
+Blue 12
+Red 8
+Yellow 7
+Blue 10
+cards in hand:
+suit is  5
+played cards:
+cards in hand:
+Blue 6  legal is True
+Red 5  legal is True
+suit is  0
+played cards:
+Red 5
+cards in hand:
+Blue 9  legal is True
+Yellow 9  legal is True
+suit is  0
+played cards:
+Red 5
+cards in hand:
+Blue 9  legal is True
+Yellow 9  legal is True
+suit is  0
+played cards:
+Red 5
+Blue 9
+cards in hand:
+Blue 10  legal is True
+Green 9  legal is True
+suit is  0
+played cards:
+Red 5
+Blue 9
+cards in hand:
+Blue 10  legal is True
+Green 9  legal is True
+suit is  0
+played cards:
+Red 5
+Blue 9
+Green 9
+cards in hand:
+Green 2  legal is True
+Blue Magic Man  legal is True
+suit is  0
+played cards:
+Red 5
+Blue 9
+Green 9
+cards in hand:
+Green 2  legal is True
+Blue Magic Man  legal is True
+suit is  0
+played cards:
+Red 5
+Blue 9
+Green 9
+Blue Magic Man
+cards in hand:
+Blue 6  legal is True
+suit is  0
+played cards:
+Red 5
+Blue 9
+Green 9
+Blue Magic Man
+cards in hand:
+Yellow 9  legal is True
+suit is  0
+played cards:
+Red 5
+Blue 9
+Green 9
+Blue Magic Man
+cards in hand:
+Blue 10  legal is True
+suit is  0
+played cards:
+Red 5
+Blue 9
+Green 9
+Blue Magic Man
+cards in hand:
+Green 2  legal is True
+suit is  5
+played cards:
+cards in hand:
+Green 2  legal is True
+suit is  5
+played cards:
+cards in hand:
+Green 2  legal is True
+suit is  3
+played cards:
+Green 2
+cards in hand:
+Blue 6  legal is True
+suit is  3
+played cards:
+Green 2
+Blue 6
+cards in hand:
+Yellow 9  legal is True
+suit is  3
+played cards:
+Green 2
+Blue 6
+cards in hand:
+Yellow 9  legal is True
+suit is  3
+played cards:
+Green 2
+Blue 6
+Yellow 9
+cards in hand:
+Blue 10  legal is True
+suit is  3
+played cards:
+Green 2
+Blue 6
+Yellow 9
+cards in hand:
+Blue 10  legal is True
+suit is  3
+played cards:
+Green 2
+Blue 6
+Yellow 9
+Blue 10
+cards in hand:
+suit is  3
+played cards:
+Green 2
+Blue 6
+Yellow 9
+Blue 10
+cards in hand:
+suit is  3
+played cards:
+Green 2
+Blue 6
+Yellow 9
+Blue 10
+cards in hand:
+suit is  3
+played cards:
+Green 2
+Blue 6
+Yellow 9
+Blue 10
+cards in hand:
+suit is  5
+played cards:
+cards in hand:
+Green 3  legal is True
+Green Magic Man  legal is True
+suit is  5
+played cards:
+cards in hand:
+Green 3  legal is True
+Green Magic Man  legal is True
+suit is  4
+played cards:
+Green Magic Man
+cards in hand:
+Blue 6  legal is True
+Green 4  legal is True
+suit is  4
+played cards:
+Green Magic Man
+cards in hand:
+Blue 6  legal is True
+Green 4  legal is True
+suit is  4
+played cards:
+Green Magic Man
+Blue 6
+cards in hand:
+Yellow 3  legal is True
+Blue 8  legal is True
+suit is  4
+played cards:
+Green Magic Man
+Blue 6
+cards in hand:
+Yellow 3  legal is True
+Blue 8  legal is True
+suit is  4
+played cards:
+Green Magic Man
+Blue 6
+Blue 8
+cards in hand:
+Yellow 1  legal is True
+Blue Magic Man  legal is True
+suit is  4
+played cards:
+Green Magic Man
+Blue 6
+Blue 8
+Yellow 1
+cards in hand:
+Green 3  legal is True
+suit is  4
+played cards:
+Green Magic Man
+Blue 6
+Blue 8
+Yellow 1
+cards in hand:
+Green 4  legal is True
+suit is  4
+played cards:
+Green Magic Man
+Blue 6
+Blue 8
+Yellow 1
+cards in hand:
+Yellow 3  legal is True
+suit is  4
+played cards:
+Green Magic Man
+Blue 6
+Blue 8
+Yellow 1
+cards in hand:
+Blue Magic Man  legal is True
+suit is  5
+played cards:
+cards in hand:
+Green 3  legal is True
+suit is  5
+played cards:
+cards in hand:
+Green 3  legal is True
+suit is  3
+can serve suit
+played cards:
+Green 3
+cards in hand:
+Green 4  legal is True
+suit is  3
+can serve suit
+played cards:

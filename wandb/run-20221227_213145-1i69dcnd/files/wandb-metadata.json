@@ -1,0 +1,42 @@
+{
+    "os": "Windows-10-10.0.19041-SP0",
+    "python": "3.9.1",
+    "heartbeatAt": "2022-12-27T20:31:46.641290",
+    "startedAt": "2022-12-27T20:31:45.782001",
+    "docker": null,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "C:\\Users\\jasper\\Documents\\LINZ\\Semester_III\\SEMINAR\\gym-MagicMan\\baselines_train.py",
+    "codePath": "baselines_train.py",
+    "git": {
+        "remote": "https://github.com/ThomSab/gym-MagicMan",
+        "commit": "b5b29d55db06000348c86eb27abd12af805e00e0"
+    },
+    "email": "64082072+ThomSab@users.noreply.github.com",
+    "root": "C:/Users/jasper/Documents/LINZ/Semester_III/SEMINAR/gym-MagicMan",
+    "host": "DESKTOP-EBBLJ2T",
+    "username": "jasper",
+    "executable": "C:\\Users\\jasper\\AppData\\Local\\Programs\\Python\\Python39\\python.exe",
+    "cpu_count": 2,
+    "cpu_count_logical": 4,
+    "cpu_freq": {
+        "current": 2295.0,
+        "min": 0.0,
+        "max": 2295.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 2295.0,
+            "min": 0.0,
+            "max": 2295.0
+        }
+    ],
+    "disk": {
+        "total": 237.1394386291504,
+        "used": 142.45720291137695
+    },
+    "memory": {
+        "total": 7.7030792236328125
+    }
+}
