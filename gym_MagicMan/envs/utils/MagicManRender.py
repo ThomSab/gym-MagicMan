@@ -33,10 +33,10 @@ def get_hand_pos_dict(canvas_size_x,canvas_size_y=None):
         canvas_size_y = canvas_size_x
     
     
-    player_0_loc={_:(canvas_size_x*.1+_*canvas_size_x/15,canvas_size_y-80                   )   for _ in range(15)}
-    player_1_loc={_:(0                                  ,canvas_size_y*.2+_*canvas_size_y/15)   for _ in range(15)}
-    player_2_loc={_:(canvas_size_x*.2+_*canvas_size_x/15,0                                  )   for _ in range(15)}
-    player_3_loc={_:(canvas_size_x-80                   ,canvas_size_y*.2+_*canvas_size_y/15)   for _ in range(15)}
+    player_0_loc={_:(canvas_size_x*.1+_*canvas_size_x/20,canvas_size_y-80                   )   for _ in range(15)}
+    player_1_loc={_:(0                                  ,canvas_size_y*.2+_*canvas_size_y/20)   for _ in range(15)}
+    player_2_loc={_:(canvas_size_x*.2+_*canvas_size_x/20,0                                  )   for _ in range(15)}
+    player_3_loc={_:(canvas_size_x-80                   ,canvas_size_y*.2+_*canvas_size_y/20)   for _ in range(15)}
 
     hand_positions_dict = {0:player_0_loc,
                            1:player_1_loc,
@@ -45,15 +45,31 @@ def get_hand_pos_dict(canvas_size_x,canvas_size_y=None):
                            }
     return hand_positions_dict
     
+def get_bid_pos_dict(canvas_size_x,canvas_size_y=None):
+
+    player_0_loc=(canvas_size_x*.1-canvas_size_x/15,canvas_size_y-80                 )
+    player_1_loc=(0                                ,canvas_size_y*.2-canvas_size_y/15)
+    player_2_loc=(canvas_size_x*.2-canvas_size_x/15,0                                )
+    player_3_loc=(canvas_size_x-80                 ,canvas_size_y*.2-canvas_size_y/15)
+
+    bid_positions_dict = {0:player_0_loc,
+                          1:player_1_loc,
+                          2:player_2_loc,
+                          3:player_3_loc
+                          }
+    
+    return bid_positions_dict
+
+    
 def get_center_pos_dict(canvas_size_x,canvas_size_y=None):
     if not canvas_size_y:
         canvas_size_y = canvas_size_x
         
     center_pos_dict = {0:(canvas_size_x/2,canvas_size_y/2+25),
-                           1:(canvas_size_x/2-45,canvas_size_y/2),
-                           2:(canvas_size_x/2,canvas_size_y/2-45),
-                           3:(canvas_size_x/2+25,canvas_size_y/2)
-                           }
+                       1:(canvas_size_x/2-45,canvas_size_y/2),
+                       2:(canvas_size_x/2,canvas_size_y/2-45),
+                       3:(canvas_size_x/2+25,canvas_size_y/2)
+                       }
                            
     return center_pos_dict
     

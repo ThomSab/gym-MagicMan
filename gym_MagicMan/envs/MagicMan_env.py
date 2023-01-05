@@ -65,6 +65,7 @@ class MagicManEnv(gym.Env):
         self.bid_idx = 0
         self.turn_cards = []
         self.last_turn_cards = []
+        self.next_round_idx_list = []
         self.current_suit_idx = 5
         self.current_suit = torch.zeros(6)
         self.all_bid_completion = torch.zeros(self.n_players)
@@ -156,6 +157,8 @@ class MagicManEnv(gym.Env):
         self.players = deque(self.players)
         self.turnorder_idx = 0
         self.turn_cards = []
+        self.last_turn_cards = []
+        self.next_round_idx_list = []
         self.current_suit_idx = 5
         self.current_suit = torch.zeros(6)
         self.all_bid_completion = torch.zeros(self.n_players)
@@ -185,7 +188,7 @@ class MagicManEnv(gym.Env):
             pygame.display.init()
             pygame.display.set_caption(f'Magic Man Round {self.current_round}')
             
-            self.font = pygame.font.SysFont('Comic Sans MS', 20)
+            self.font = pygame.font.SysFont("monospace", 20)
             self.window = pygame.display.set_mode(self.window_size)
             
             
@@ -197,6 +200,7 @@ class MagicManEnv(gym.Env):
             
             self.hand_pos_dict = mm_render.get_hand_pos_dict(*self.window_size)
             self.center_pos_dict = mm_render.get_center_pos_dict(*self.window_size)
+            self.bid_pos_dict = mm_render.get_bid_pos_dict(*self.window_size)
            
        
         self.give_out_cards()
@@ -205,6 +209,8 @@ class MagicManEnv(gym.Env):
         return obs
 
     def render(self,placeholder_arg=None,last_step=False):
+        #could just move the whole render function outside of the gym env
+        #like mm_render.render(self.last_step)
 
         if self.render_mode in ["human","human_interactive"] :
             # The following line copies our drawings from `canvas` to the visible window
@@ -215,20 +221,22 @@ class MagicManEnv(gym.Env):
             for player in self.players:
                 mm_render.render_hand_cards(player,self.hand_pos_dict,self.card_sprite_dict,self.window)
                 
+                bid_loc = self.bid_pos_dict[player.table_idx]
+                label = self.font.render(f"[{player.round_suits}/{player.current_bid}]", 1, (0,0,0))
+                self.window.blit(label, bid_loc)
             
             for card_idx,card in enumerate(self.turn_cards):
                 player_table_idx = self.players[card_idx].table_idx
                 card_loc = self.center_pos_dict[player_table_idx]
                 card_surface = self.card_sprite_dict[str(card)].surface
-                self.window.blit(card_surface,dest=card_loc)
+                self.window.blit(card_surface,dest=card_loc)         
             
-            
-            for card_idx,card in enumerate(self.last_turn_cards):
-                player_table_idx = self.players[card_idx].table_idx
+            for player_table_idx,card in zip(self.next_round_idx_list,self.last_turn_cards):
                 card_loc_x,card_loc_y = self.center_pos_dict[player_table_idx]
                 card_loc = (card_loc_x+100,card_loc_y+100)
                 card_surface = self.card_sprite_dict[str(card)].surface
                 self.window.blit(card_surface,dest=card_loc)
+                
             
             
             
@@ -266,9 +274,7 @@ class MagicManEnv(gym.Env):
  
     def give_out_cards(self):
         self.round_deck = deck.deck.copy()
-        print(self.round_deck)
         random.shuffle(self.round_deck) 
-        print(self.round_deck)
    
         if self.render_mode in ["human","human_interactive"]:
             self.card_sprite_dict = {str(card):mm_render.CardSprite(card) for card in deck.deck}
@@ -524,7 +530,10 @@ class MagicManEnv(gym.Env):
             for card_idx in range(len(self.turn_cards)):
                 played_card = self.turn_cards[card_idx]
                 player.turn_obs["played_cards"][card_idx][deck.deck.index(played_card)] = 1
-            self.last_turn_cards = self.turn_cards
+            if self.render_mode in ["human","human_interactive"]:
+                self.last_turn_cards = self.turn_cards
+                self.next_round_idx_list = [self.players[card_idx].table_idx for card_idx,card in enumerate(self.turn_cards)]
+
             
             player.round_obs[self.turn_idx] = player.turn_obs 
 
@@ -565,12 +574,16 @@ if __name__ == "__main__":
     current_round=8
 
     env = gym.make("MagicMan-v0",adversaries='trained',current_round=current_round,render_mode='human_interactive',verbose=False)#,current_round=2,verbose=0,verbose_obs=0)
-    env.seed(0)
+    env.seed()
     #env = gym.wrappers.FlattenObservation(env)
 
     r_list = []
     info_mean = None
-    for _ in range(3):
+    
+    for player in env.players:
+        player.total_score = 0
+    
+    for _ in range(100):
         done = False
         obs = env.reset()
         round_idx=0
@@ -581,7 +594,10 @@ if __name__ == "__main__":
             
         env.render(last_step=True)
         for player in env.players:
-            print(f"{player.name} recieves {player.round_r*10} points.")  
+            player.total_score +=player.round_r*10
+            print(f"{player.name} recieves {player.round_r*10} points.")
+            print(f"{player.name} total score is {player.total_score} points.\n")
+        print("\n")    
 
     env.close()
 

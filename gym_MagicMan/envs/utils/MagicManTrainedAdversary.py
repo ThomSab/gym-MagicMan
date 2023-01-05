@@ -1,6 +1,7 @@
 import numpy
 import torch
 import os
+import random
 
 import gym_MagicMan.envs.utils.MagicManDeck as deck
 from gym_MagicMan.envs.utils.MagicManPlayer import AdversaryPlayer
@@ -17,7 +18,7 @@ class TrainedAdversary(AdversaryPlayer):
         except:
             print("chdir in trained player adversary module did not work, ignore if in colab")
         
-        
+        self.name = "TrainedAdversary"+str(random.randint(111111,999999))
         self.model = MaskablePPO.load(load_path)
              
         
