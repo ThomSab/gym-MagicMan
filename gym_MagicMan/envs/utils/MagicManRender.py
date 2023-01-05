@@ -1,6 +1,8 @@
 import pygame
 import os
 from gym_MagicMan.envs.utils.MagicManDeck import Card
+from gym_MagicMan.envs.utils.MagicManPlayer import TrainPlayer,AdversaryPlayer
+
 
 try:
     os.chdir(r"C:\Users\jasper\Documents\LINZ\Semester_III\SEMINAR\gym-MagicMan")
@@ -12,12 +14,14 @@ class CardSprite(pygame.sprite.Sprite):
         super(CardSprite, self).__init__()
         self.card_img = pygame.image.load(f"gym_MagicMan\envs\imgs\{str(card)}.png")
         self.surface = self.card_img.convert()
-        self.backside = pygame.image.load("gym_MagicMan\envs\imgs\Backside.png").convert()
+        self.back_img = pygame.image.load("gym_MagicMan\envs\imgs\Backside.png")
+        self.backside = self.back_img.convert()
         self.rect = self.surface.get_rect()
         
     def owned_by(self,player_idx):
         angle = player_idx*-90
         self.surface = pygame.transform.rotate(self.card_img, angle)
+        self.backside = pygame.transform.rotate(self.back_img, angle)
 
 def reset_cards(sprite_deck):
     for card_sprite in sprite_deck:
@@ -58,7 +62,13 @@ def get_center_pos_dict(canvas_size_x,canvas_size_y=None):
 def render_hand_cards(player,hand_positions_dict,card_sprite_dict,window):
     
     for card_idx,card in enumerate(player.cards_obj):
-        card_sprite = card_sprite_dict[str(card)]
+        card_sprite = card_sprite_dict[str(card)] 
+        
         pos = hand_positions_dict[player.table_idx][card_idx]
-        card_sprite.rect = card_sprite.surface.get_rect().move(*pos)
-        window.blit(card_sprite.surface,dest=pos)
+        if isinstance(player,TrainPlayer):
+            card_sprite.rect = card_sprite.surface.get_rect().move(*pos)
+            window.blit(card_sprite.surface,dest=pos)
+            
+        else:
+            card_sprite.rect = card_sprite.backside.get_rect().move(*pos)
+            window.blit(card_sprite.backside,dest=pos)

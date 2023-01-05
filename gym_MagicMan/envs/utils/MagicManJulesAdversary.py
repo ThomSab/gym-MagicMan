@@ -52,7 +52,7 @@ class JulesAdversary(AdversaryPlayer):
         bid = magic_man_bid + trump_bid + sum(clr_bid_dict.values())
         
         
-        return (bid / torch.argmax(obs["n_cards"])).item()      
+        return (bid / 4).item()      
 
         
     def play (self,obs,action_mask):

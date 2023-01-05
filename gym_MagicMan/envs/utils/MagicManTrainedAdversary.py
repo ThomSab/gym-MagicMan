@@ -23,12 +23,13 @@ class TrainedAdversary(AdversaryPlayer):
         
         
     def bid (self,obs):
-        return (torch.argmax(obs["n_cards"]).item()/4)      
+        bid = (1/4)
+        return bid   
 
         
     def play (self,obs,action_mask):
-    
-        action, _states = self.model.predict(obs)
+        
+        action, _states = self.model.predict(obs,action_masks=action_mask)
         return action
 
     def clean_hand(self):

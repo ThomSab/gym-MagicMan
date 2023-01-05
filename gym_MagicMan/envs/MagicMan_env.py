@@ -13,6 +13,8 @@ import pygame
 from gym_MagicMan.envs.utils.MagicManPlayer import TrainPlayer,AdversaryPlayer
 from gym_MagicMan.envs.utils.MagicManRandomAdversary import RandomAdversary
 from gym_MagicMan.envs.utils.MagicManJulesAdversary import JulesAdversary
+from gym_MagicMan.envs.utils.MagicManTrainedAdversary import TrainedAdversary
+
 import gym_MagicMan.envs.utils.MagicManRender as mm_render
 import gym_MagicMan.envs.utils.MagicManDeck as deck
 
@@ -32,17 +34,22 @@ class MagicManEnv(gym.Env):
         
         self.round_deck = []
         self.players = []
+
+        self.current_round = current_round
         
         if adversaries=='random':
             self.players = [RandomAdversary() for _ in range(3)]
         elif adversaries=='jules':
             self.players = [JulesAdversary() for _ in range(3)]
+        elif adversaries == 'trained':
+            self.flat_out = True
+            self.players = [TrainedAdversary(fr"gym_MagicMan\envs\models\TrainedAdversary_R{self.current_round}\model") for _ in range(3)]
+            
         
         self.train_player = TrainPlayer()
         self.players.append(self.train_player)
         self.n_players = len(self.players)
         self.max_rounds = int(60/self.n_players)
-        self.current_round = current_round
         self.bids = torch.zeros(self.n_players)#torch.full(tuple([self.n_players]),float(round(self.current_round/self.n_players)))
         self.trump = 0 #trump is red every time so the bots have a better time learning
         random.shuffle(self.players)
@@ -128,7 +135,11 @@ class MagicManEnv(gym.Env):
         self.window = None
         self.clock = None
         self.window_size = (1000,700)
-            
+    
+    def seed(self, seed: int) -> None:
+        random.seed(seed)
+        np.random.seed
+    
     def get_flat(self,obs_dict):
         return torch.from_numpy(gym.spaces.flatten(self.observation_space,obs_dict)).to(self.device)
     
@@ -255,12 +266,13 @@ class MagicManEnv(gym.Env):
  
     def give_out_cards(self):
         self.round_deck = deck.deck.copy()
+        print(self.round_deck)
         random.shuffle(self.round_deck) 
+        print(self.round_deck)
    
         if self.render_mode in ["human","human_interactive"]:
             self.card_sprite_dict = {str(card):mm_render.CardSprite(card) for card in deck.deck}
-            for card_name,card_sprite in self.card_sprite_dict.items():
-                card_sprite.owned_by          
+       
                 
         for _ in range(self.current_round):
             for player in self.players:
@@ -429,7 +441,9 @@ class MagicManEnv(gym.Env):
                     if self.verbose_obs:
                         print(f"Adverse Player Observation: {player_obs}")
                     #action is input not output!!!
-                    net_out = player.play(player_obs,self.action_mask)
+                    if self.flat_out:
+                        flat_round_obs = self.get_flat(player_obs)
+                    net_out = player.play(flat_round_obs,self.action_mask)
                     action_idx = net_out
                     
                     played_card = deck.deck[action_idx]
@@ -446,7 +460,7 @@ class MagicManEnv(gym.Env):
                         print(f"Train Player Observation: {player_obs}")
                         print(f"Train Player action mask: {self.action_mask}")
                     dict_round_obs = player_obs
-                        
+
                     return dict_round_obs, self.r, self.done, self.info
                     
                 else:
@@ -523,7 +537,9 @@ class MagicManEnv(gym.Env):
                 round_reward = player.current_bid + 2 #ten point for every turn won and 20 for guessing right
             else:
                 round_reward =  -abs(player.current_bid-player.round_suits) #ten points for every falsly claimed suit
-                
+            
+            player.round_r = round_reward
+            
             if isinstance(player,TrainPlayer):
                 self.r = round_reward
                 self.done = True
@@ -548,23 +564,24 @@ class MagicManEnv(gym.Env):
 if __name__ == "__main__":
     current_round=8
 
-    env = gym.make("MagicMan-v0",adversaries='jules',current_round=current_round,render_mode='human_interactive',verbose=True)#,current_round=2,verbose=0,verbose_obs=0)
+    env = gym.make("MagicMan-v0",adversaries='trained',current_round=current_round,render_mode='human_interactive',verbose=False)#,current_round=2,verbose=0,verbose_obs=0)
+    env.seed(0)
     #env = gym.wrappers.FlattenObservation(env)
 
     r_list = []
     info_mean = None
-    for _ in range(1):
+    for _ in range(3):
         done = False
         obs = env.reset()
         round_idx=0
         while not done:
             action = env.render()
-            print(action)
             obs, r, done, info = env.step(action)
             round_idx+=1
             
-    env.render(last_step=True)
-    print(f"You recieve {r*10} points.")
-    input()
+        env.render(last_step=True)
+        for player in env.players:
+            print(f"{player.name} recieves {player.round_r*10} points.")  
+
     env.close()
 
