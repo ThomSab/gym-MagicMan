@@ -452,7 +452,8 @@ class MagicManEnv(gym.Env):
                     #action is input not output!!!
                     if self.flat_out:
                         flat_round_obs = self.get_flat(player_obs)
-                    net_out = player.play(flat_round_obs,self.action_mask)
+                        player_obs = flat_round_obs
+                    net_out = player.play(player_obs,self.action_mask)
                     action_idx = net_out
                     
                     played_card = deck.deck[action_idx]
