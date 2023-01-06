@@ -37,9 +37,12 @@ class MagicManEnv(gym.Env):
 
         self.current_round = current_round
         
+        
         if adversaries=='random':
+            self.flat_out = False
             self.players = [RandomAdversary() for _ in range(3)]
         elif adversaries=='jules':
+            self.flat_out = False
             self.players = [JulesAdversary() for _ in range(3)]
         elif adversaries == 'trained':
             self.flat_out = True
