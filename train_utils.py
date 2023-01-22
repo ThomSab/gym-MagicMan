@@ -18,7 +18,7 @@ from stable_baselines3.common.vec_env import DummyVecEnv
 from sb3_contrib.common.wrappers import ActionMasker
 from sb3_contrib.ppo_mask import MaskablePPO
 
-from gym_MagicMan.envs.utils.MagicManTrainedAdversary import TrainedAdversary
+from gym_MagicMan.envs.utils.players.MagicManAdversary_Trained import TrainedAdversary
 
 
 try:
@@ -55,7 +55,7 @@ config={"policy_type": "MlpPolicy",
         "total_timesteps":1_000_000,
         "env_name": "MagicMan-v0",
         "current_round": 8,
-        "adversaries":'jules',
+        "adversaries":'naive',
         "clip_range":0.2,#0.2
         "ent_coef":0.2,#0.0
         "vf_coef":0.5,#0.5
@@ -83,13 +83,90 @@ def mask_fn(env: gym.Env) -> torch.Tensor:
 
 def profile():
     cProfile.run("model.learn(total_timesteps=100000)")    
+
+
+def train(config,resume_id=None,local=False,save_path=None):
+
+    env = make_env(config)
+    env = ActionMasker(env, mask_fn)
+
+    if local:
+        train_local_test(env=env,config=config)
+    else:
+        assert save_path, "When training online, save_path variable must be passed to training method."
+        train_online(env=env,resume_id=resume_id,config=config,save_path=save_path)
+  
+  
+def train_local_test(env,config):
+
+    resume = False
+    config["run_id"] = wandb.util.generate_id() + "_LOCALRUN"
+
+
+    experiment_name = f"GPU_MPPO_R{config['current_round']}_{config['run_id']}"
+
+    wandb.init(
+            name=experiment_name,
+            id=config['run_id'],
+            project="MagicManGym",
+            config=config,
+            sync_tensorboard=True,  # auto-upload sb3's tensorboard metrics
+            monitor_gym=True,  # auto-upload the videos of agents playing the game
+            resume = resume
+    )
+
     
-def train():
+    model = make_new_model(config,env)
+
     model.learn(total_timesteps=config["total_timesteps"],
-                callback=WandbCallback(gradient_save_freq=1_000_000,
+                callback=WandbCallback(gradient_save_freq=0,
                                        verbose=2,
-                                       model_save_freq=1_000_000,
-                                       model_save_path=f"models/{experiment_name}",))   
+                                       model_save_freq=0,
+                                       model_save_path=None))
+
+
+def train_online(env,config,resume_id,save_path):
+
+    if not wandb_id:
+        wandb_id = wandb.util.generate_id()
+        resume = False
+    else:
+        resume = "must"
+
+    experiment_name = f"GPU_MPPO_R{config['current_round']}_{config['run_id']}"
+    if resume=="must":
+        wandb.init(project="MagicManGym",
+                   id=resume_id,
+                   sync_tensorboard=True,
+                   monitor_gym=True,
+                   resume=resume)
+        config = wandb.run.config
+
+    if resume==False:
+        wandb.init(
+                name=experiment_name,
+                id=config['run_id'],
+                project="MagicManGym",
+                config=config,
+                sync_tensorboard=True,  # auto-upload sb3's tensorboard metrics
+                monitor_gym=True,  # auto-upload the videos of agents playing the game
+                resume = resume
+        )
+
+    model_save_path=f"{save_path}/{wandb.run.name}"
+
+    if resume == "must":
+        model = MaskablePPO.load(model_save_path+r"/model",env=env)
+    else:
+        model = make_new_model(config,env)
+
+    model.learn(total_timesteps=config["total_timesteps"],
+                callback=WandbCallback(gradient_save_freq=10_000,
+                                       verbose=2,
+                                       model_save_freq=10_000,
+                                       model_save_path=model_save_path))
+                                       
+                                       
                                    
 def print_params(model):
     params = model.get_parameters()
@@ -115,18 +192,7 @@ def make_new_model(config,env):
 
 
 if __name__ == "__main__":
-    experiment_name = f"CPU_MPPO_R{config['current_round']}_{int(time.time())}"
-
-    env = make_env()
-    env = ActionMasker(env, mask_fn)
-    
-    trained_agent = TrainedAdversary(r"models\GPU_MPPO_R8_1672685724\model")
-    
-    obs = env.reset()
-    action = trained_agent.play(obs,env.action_mask)
-    
-    print(action)
-    
+    raise UserWarning("'train_utils.py' is not supposed to be called directly and contains only utility functions. Maybe you meant to call 'local_train_test.py'")
 
 
 

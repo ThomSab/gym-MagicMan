@@ -6,7 +6,11 @@ from gym_MagicMan.envs.utils.MagicManPlayer import AdversaryPlayer
 from torch.distributions import Uniform, Categorical
 
 
-class JulesAdversary(AdversaryPlayer):
+class NaiveAdversary(AdversaryPlayer):
+    """
+    My Name used to be Jules. :)
+    """
+    
     """
     player.round_obs = {_:
                             {
@@ -107,7 +111,7 @@ class JulesAdversary(AdversaryPlayer):
             minval_card = min(cards_value_dict, key=cards_value_dict.get)
             return deck.deck.index(minval_card)
                 
-        raise UserWarning ("Playing method of JulesAdversary should have returned a card index but did not")
+        raise UserWarning ("Playing method of NaiveAdversary should have returned a card index but did not")
         
         # hoch fehl am anfang weil bedienen
         # niedrige truempfe am anfang zum trumpf ziehen

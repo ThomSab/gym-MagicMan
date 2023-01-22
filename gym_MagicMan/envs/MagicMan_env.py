@@ -11,9 +11,9 @@ from collections import deque
 import pygame
 
 from gym_MagicMan.envs.utils.MagicManPlayer import TrainPlayer,AdversaryPlayer
-from gym_MagicMan.envs.utils.MagicManRandomAdversary import RandomAdversary
-from gym_MagicMan.envs.utils.MagicManJulesAdversary import JulesAdversary
-from gym_MagicMan.envs.utils.MagicManTrainedAdversary import TrainedAdversary
+from gym_MagicMan.envs.utils.players.MagicManAdversary_Random import RandomAdversary
+from gym_MagicMan.envs.utils.players.MagicManAdversary_Naive import NaiveAdversary
+from gym_MagicMan.envs.utils.players.MagicManAdversary_Trained import TrainedAdversary
 
 import gym_MagicMan.envs.utils.MagicManRender as mm_render
 import gym_MagicMan.envs.utils.MagicManDeck as deck
@@ -41,9 +41,9 @@ class MagicManEnv(gym.Env):
         if adversaries=='random':
             self.flat_out = False
             self.players = [RandomAdversary() for _ in range(3)]
-        elif adversaries=='jules':
+        elif adversaries=='naive':
             self.flat_out = False
-            self.players = [JulesAdversary() for _ in range(3)]
+            self.players = [NaiveAdversary() for _ in range(3)]
         elif adversaries == 'trained':
             self.flat_out = True
             self.players = [TrainedAdversary(fr"gym_MagicMan\envs\models\TrainedAdversary_R{self.current_round}\model") for _ in range(3)]
