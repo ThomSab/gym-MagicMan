@@ -127,10 +127,11 @@ def train_local_test(env,config):
 
 def train_online(env,config,resume_id,save_path):
 
-    if not wandb_id:
+    if not resume_id:
         wandb_id = wandb.util.generate_id()
         resume = False
     else:
+        config['run_id'] = resume_id
         resume = "must"
 
     experiment_name = f"GPU_MPPO_R{config['current_round']}_{config['run_id']}"
