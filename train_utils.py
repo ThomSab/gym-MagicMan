@@ -128,47 +128,45 @@ def train_local_test(env,config):
 def train_online(env,config,resume_id,save_path):
 
     if not resume_id:
-        wandb_id = wandb.util.generate_id()
-        resume = False
+        config['run_id'] = wandb.util.generate_id()
+        model = online_init(config,env)
     else:
-        config['run_id'] = resume_id
-        resume = "must"
+        model, config = online_resume(resume_id,save_path,env)
+
+    model.learn(total_timesteps=config["total_timesteps"],
+                callback=WandbCallback(gradient_save_freq=10_000,
+                                       verbose=2,
+                                       model_save_freq=10_000,
+                                       model_save_path=f"{save_path}/{wandb.run.name}"))
+
+def online_init(config,env):
 
     experiment_name = f"GPU_MPPO_R{config['current_round']}_{config['run_id']}"
-    if resume=="must":
-        wandb.init(project="MagicManGym",
-                   id=resume_id,
-                   sync_tensorboard=True,
-                   monitor_gym=True,
-                   resume=resume)
-        config = wandb.run.config
-
-    if resume==False:
-        wandb.init(
+    wandb.init(
                 name=experiment_name,
                 id=config['run_id'],
                 project="MagicManGym",
                 config=config,
                 sync_tensorboard=True,  # auto-upload sb3's tensorboard metrics
                 monitor_gym=True,  # auto-upload the videos of agents playing the game
-                resume = resume
+                resume = False
         )
+    model = make_new_model(config,env)
+    return model
 
-    model_save_path=f"{save_path}/{wandb.run.name}"
 
-    if resume == "must":
-        model = MaskablePPO.load(model_save_path+r"/model",env=env)
-    else:
-        model = make_new_model(config,env)
+def online_resume(resume_id,save_path,env):    
 
-    model.learn(total_timesteps=config["total_timesteps"],
-                callback=WandbCallback(gradient_save_freq=10_000,
-                                       verbose=2,
-                                       model_save_freq=10_000,
-                                       model_save_path=model_save_path))
-                                       
-                                       
-                                   
+    wandb.init(project="MagicManGym",
+               id=resume_id,
+               sync_tensorboard=True,
+               monitor_gym=True,
+               resume="must")
+    config = wandb.run.config        
+    model = MaskablePPO.load(f"{save_path}/{wandb.run.name}"+r"/model",env=env)
+    return model,config
+
+
 def print_params(model):
     params = model.get_parameters()
     for key,val in params["policy"].items():
