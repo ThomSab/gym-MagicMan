@@ -1,7 +1,6 @@
 import gym
 import gym_MagicMan
 
-
 import torch
 import os
 import time
@@ -19,15 +18,6 @@ from sb3_contrib.common.wrappers import ActionMasker
 from sb3_contrib.ppo_mask import MaskablePPO
 
 from gym_MagicMan.envs.utils.players.MagicManAdversary_Trained import TrainedAdversary
-
-
-try:
-    os.chdir(r'C:\Users\jasper\Documents\LINZ\Semester_III\SEMINAR\gym-MagicMan')
-except FileNotFoundError:
-    print("PATH NOT FOUND. - Ignore if run in Colab - ")
-
-
-
     
 
 def linear_schedule(initial_value):

@@ -13,11 +13,7 @@ class TrainedAdversary(AdversaryPlayer):
 
     def __init__(self,load_path):
         super().__init__()
-        try:
-            os.chdir(r"C:\Users\jasper\Documents\LINZ\Semester_III\SEMINAR\gym-MagicMan")
-        except:
-            print("chdir in trained player adversary module did not work, ignore if in colab")
-        
+
         self.name = "TrainedAdversary"+str(random.randint(111111,999999))
         self.model = MaskablePPO.load(load_path)
              

@@ -46,7 +46,7 @@ class MagicManEnv(gym.Env):
             self.players = [NaiveAdversary() for _ in range(3)]
         elif adversaries == 'trained':
             self.flat_out = True
-            self.players = [TrainedAdversary(fr"gym_MagicMan\envs\models\TrainedAdversary_R{self.current_round}\model") for _ in range(3)]
+            self.players = [TrainedAdversary(fr"models\TrainedAdversary_R{self.current_round}\model") for _ in range(3)]
             
         
         self.train_player = TrainPlayer()
@@ -579,7 +579,6 @@ if __name__ == "__main__":
 
     env = gym.make("MagicMan-v0",adversaries='trained',current_round=current_round,render_mode='human_interactive',verbose=False)#,current_round=2,verbose=0,verbose_obs=0)
     env.seed()
-    #env = gym.wrappers.FlattenObservation(env)
 
     r_list = []
     info_mean = None

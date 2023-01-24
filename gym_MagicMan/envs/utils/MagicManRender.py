@@ -4,17 +4,12 @@ from gym_MagicMan.envs.utils.MagicManDeck import Card
 from gym_MagicMan.envs.utils.MagicManPlayer import TrainPlayer,AdversaryPlayer
 
 
-try:
-    os.chdir(r"C:\Users\jasper\Documents\LINZ\Semester_III\SEMINAR\gym-MagicMan")
-except:
-    print("Changing directory to load the card sprites failed. Ignore if executed in notebook.")
-
 class CardSprite(pygame.sprite.Sprite):
     def __init__(self,card):
         super(CardSprite, self).__init__()
-        self.card_img = pygame.image.load(f"gym_MagicMan\envs\imgs\{str(card)}.png")
+        self.card_img = pygame.image.load(f"imgs\{str(card)}.png")
         self.surface = self.card_img.convert()
-        self.back_img = pygame.image.load("gym_MagicMan\envs\imgs\Backside.png")
+        self.back_img = pygame.image.load("imgs\Backside.png")
         self.backside = self.back_img.convert()
         self.rect = self.surface.get_rect()
         
