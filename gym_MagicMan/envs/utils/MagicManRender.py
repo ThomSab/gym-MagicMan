@@ -67,8 +67,7 @@ def get_center_pos_dict(canvas_size_x,canvas_size_y=None):
                        }
                            
     return center_pos_dict
-    
-    
+        
 
 def render_hand_cards(player,hand_positions_dict,card_sprite_dict,window):
     
@@ -83,3 +82,24 @@ def render_hand_cards(player,hand_positions_dict,card_sprite_dict,window):
         else:
             card_sprite.rect = card_sprite.backside.get_rect().move(*pos)
             window.blit(card_sprite.backside,dest=pos)
+
+def activate_cards_buttons(self,deck,last_step):
+    if self.render_mode=="human_interactive":
+        if last_step:
+            return None
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    for card in self.train_player.cards_obj:
+                        card_sprite = self.card_sprite_dict[str(card)]
+                        if card_sprite.rect.collidepoint(pygame.mouse.get_pos()):
+                            intended_card_idx = deck.deck.index(card)
+                            self.action_mask
+
+                            if self.action_mask[intended_card_idx]:
+                                return intended_card_idx
+                            else:
+                                print(f"{str(card)} is not legal")
+                                #eternal judgement will be cast on me for going 10 dents deep
+                              
+        self.clock.tick(self.metadata["render_fps"])

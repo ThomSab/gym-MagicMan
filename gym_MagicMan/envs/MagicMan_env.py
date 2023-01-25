@@ -139,6 +139,7 @@ class MagicManEnv(gym.Env):
         self.window = None
         self.clock = None
         self.window_size = (1000,700)
+        self.activate_cards_buttons = mm_render.activate_cards_buttons
     
     def seed(self, seed: int) -> None:
         random.seed(seed)
@@ -211,6 +212,8 @@ class MagicManEnv(gym.Env):
    
         return obs
 
+    
+
     def render(self,placeholder_arg=None,last_step=False):
         #could just move the whole render function outside of the gym env
         #like mm_render.render(self.last_step)
@@ -245,25 +248,12 @@ class MagicManEnv(gym.Env):
             
             pygame.display.update()
 
+            
+            
             if self.render_mode=="human_interactive":
-                if last_step:
-                    return None
-                while True:
-                    for event in pygame.event.get():
-                        if event.type == pygame.MOUSEBUTTONDOWN:
-                            for card in self.train_player.cards_obj:
-                                card_sprite = self.card_sprite_dict[str(card)]
-                                if card_sprite.rect.collidepoint(pygame.mouse.get_pos()):
-                                    intended_card_idx = deck.deck.index(card)
-                                    self.action_mask
+                interactive_action = self.activate_cards_buttons(self,deck,last_step)
+                return interactive_action
 
-                                    if self.action_mask[intended_card_idx]:
-                                        return intended_card_idx
-                                    else:
-                                        print(f"{str(card)} is not legal")
-                                        #eternal judgement will be cast on me for going 10 dents deep
-                                      
-                self.clock.tick(self.metadata["render_fps"])
             else:
                 raise UserWarning("Do not attempt to render the environment when it is not in render mode!")
             
