@@ -1,6 +1,5 @@
 import gym
 from gym import error, spaces, utils
-from gym.utils import seeding
 from gym.spaces import Dict,Box,Discrete
 
 import numpy as np
@@ -141,9 +140,9 @@ class MagicManEnv(gym.Env):
         self.window_size = (1000,700)
         self.activate_cards_buttons = mm_render.activate_cards_buttons
     
-    def seed(self, seed: int) -> None:
+    def seed(self, seed) -> None:
         random.seed(seed)
-        np.random.seed
+        np.random.seed(seed)
     
     def get_flat(self,obs_dict):
         return torch.from_numpy(gym.spaces.flatten(self.observation_space,obs_dict)).to(self.device)
@@ -568,13 +567,14 @@ if __name__ == "__main__":
     current_round=8
 
     env = gym.make("MagicMan-v0",adversaries='trained',current_round=current_round,render_mode='human_interactive',verbose=False)#,current_round=2,verbose=0,verbose_obs=0)
-    env.seed()
+    env.seed(None)
 
     r_list = []
     info_mean = None
     
     for player in env.players:
         player.total_score = 0
+        print(f"{player.name} total score is {player.total_score} points.\n")
     
     for _ in range(100):
         done = False
@@ -586,10 +586,12 @@ if __name__ == "__main__":
             round_idx+=1
             
         env.render(last_step=True)
+        print(f"Round {_+1}")
         for player in env.players:
             player.total_score +=player.round_r*10
             print(f"{player.name} recieves {player.round_r*10} points.")
-            print(f"{player.name} total score is {player.total_score} points.\n")
+            print(f"{player.name} total score is {player.total_score} points.")
+            print(f"{player.name} average score is {round(player.total_score/(_+1),2)} points.\n")
         print("\n")    
 
     env.close()

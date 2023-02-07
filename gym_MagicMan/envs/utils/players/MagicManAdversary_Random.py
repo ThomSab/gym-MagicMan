@@ -5,7 +5,8 @@ from torch.distributions import Uniform, Categorical
 class RandomAdversary(AdversaryPlayer):
 
     def __init__(self):
-        super().__init__()     
+        super().__init__()
+        self.name = "RandomAdversary"+str(self.random_id)
         self.bid_distribution = Uniform(0,1)
   
     def play (self,obs,action_mask):

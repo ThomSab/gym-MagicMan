@@ -14,7 +14,7 @@ class TrainedAdversary(AdversaryPlayer):
     def __init__(self,load_path):
         super().__init__()
 
-        self.name = "TrainedAdversary"+str(random.randint(111111,999999))
+        self.name = "TrainedAdversary"+str(self.random_id)
         self.model = MaskablePPO.load(load_path)
              
         

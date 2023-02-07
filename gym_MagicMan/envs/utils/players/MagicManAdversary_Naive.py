@@ -28,6 +28,8 @@ class NaiveAdversary(AdversaryPlayer):
 
     def __init__(self):
         super().__init__()
+
+        self.name = "NaiveAdversary"+str(self.random_id)
         
         self.mgm_factor     = 1
         self.tmp_n_factor   = .3
