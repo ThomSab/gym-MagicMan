@@ -17,11 +17,11 @@ Including a training algorithm for the games adversaries.
 - sb3-contrib
 
 ## Installation
-Inside gym-MagicMan directory open shell execute:
+Inside gym-MagicMan directory open shell and execute:
 
  " py -m pip install -e . "
  
 ## Run
-Execute:
+Execute "MagicMan_env.py" inside
  
-  " py [path to repo]\gym-MagicMan\gym_MagicMan\envs\MagicMan_env " 
+..\gym-MagicMan\gym_MagicMan\envs\
