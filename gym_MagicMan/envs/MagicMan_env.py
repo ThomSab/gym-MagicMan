@@ -145,16 +145,15 @@ class MagicManEnv(gym.Env):
         self.window_size = (1000,700)
         self.activate_cards_buttons = mm_render.activate_cards_buttons
     
-    def seed(self, seed) -> None:
-        random.seed(seed)
-        np.random.seed(seed)
-    
     def get_flat(self,obs_dict):
         return torch.from_numpy(gym.spaces.flatten(self.observation_space,obs_dict)).to(self.device)
     
-    def reset(self,seed):
+    def reset(self,seed=None,options=None):
     
-        super().reset(seed=seed)
+        if seed:
+            super().reset(seed=seed)
+            random.seed(seed)
+            np.random.seed(seed)
     
         self.round_deck = []
         self.bids = torch.zeros(self.n_players) #torch.full(tuple([self.n_players]),float(round(self.current_round/self.n_players)))
