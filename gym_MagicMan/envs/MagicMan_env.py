@@ -152,7 +152,10 @@ class MagicManEnv(gym.Env):
     def get_flat(self,obs_dict):
         return torch.from_numpy(gym.spaces.flatten(self.observation_space,obs_dict)).to(self.device)
     
-    def reset(self):
+    def reset(self,seed):
+    
+        super().reset(seed=seed)
+    
         self.round_deck = []
         self.bids = torch.zeros(self.n_players) #torch.full(tuple([self.n_players]),float(round(self.current_round/self.n_players)))
         random.shuffle(self.players)
@@ -572,7 +575,6 @@ if __name__ == "__main__":
     current_round=8
 
     env = gym.make("MagicMan-v0",adversaries='trained',current_round=current_round,render_mode='human_interactive',verbose=False)#,current_round=2,verbose=0,verbose_obs=0)
-    env.seed(None)
 
     r_list = []
     info_mean = None
