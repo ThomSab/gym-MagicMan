@@ -86,7 +86,7 @@ def profile():
 
 def train(config,resume_id=None,local=False,save_path=None):
 
-    env = make_env(config)
+    env = make_env(config,apply_api_compatibility=True)
     env = ActionMasker(env, mask_fn)
 
 
