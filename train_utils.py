@@ -62,7 +62,8 @@ experiment_name = f"CPU_MPPO_R{config['current_round']}_{int(time.time())}"
 def make_env(config=config):
     env = gym.make(config["env_name"],
                    current_round=config["current_round"],
-                   adversaries=config["adversaries"])
+                   adversaries=config["adversaries"],
+                   apply_api_compatibility=True)
                    
     if "seed" in config.keys():
         env.reset(seed=config["seed"])
@@ -86,7 +87,7 @@ def profile():
 
 def train(config,resume_id=None,local=False,save_path=None):
 
-    env = make_env(config,apply_api_compatibility=True)
+    env = make_env(config)
     env = ActionMasker(env, mask_fn)
 
 
