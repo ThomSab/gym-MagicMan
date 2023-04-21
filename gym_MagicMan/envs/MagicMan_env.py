@@ -121,7 +121,7 @@ class MagicManEnv(gym.Env):
         
         self.flat_obs_space = gym.spaces.utils.flatten_space(self.observation_space)
     
-        self.action_space = gym.spaces.discrete.Discrete(60)
+        self.action_space = gym.spaces.discrete.Discrete#(60)
         self.action_mask = torch.zeros(60)
     
         
