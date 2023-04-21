@@ -1,6 +1,6 @@
-import gym
-from gym import error, spaces, utils
-from gym.spaces import Dict,Box,Discrete
+import gymnasium as gym
+from gymnasium import error, spaces, utils
+from gymnasium.spaces import Dict,Box,Discrete
 
 import warnings
 
@@ -126,7 +126,7 @@ class MagicManEnv(gym.Env):
         
         self.flat_obs_space = gym.spaces.utils.flatten_space(self.observation_space)
     
-        self.action_space = gym.spaces.discrete.Discrete(60)
+        self.action_space = Discrete(60)
         self.action_mask = torch.zeros(60)
     
         
