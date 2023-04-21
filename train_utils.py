@@ -67,7 +67,7 @@ def make_env(config=config):
     env = Monitor(env)
     env = gym.wrappers.FlattenObservation(env)
 
-    supported_action_spaces = (gymn.spaces.discrete.Discrete,gym.spaces.multi_discrete.MultiDiscrete,gym.spaces.multi_binary.MultiBinary)
+    supported_action_spaces = (gym.spaces.discrete.Discrete,gym.spaces.multi_discrete.MultiDiscrete,gym.spaces.multi_binary.MultiBinary)
     if supported_action_spaces is not None:
         assert isinstance(env.action_space, supported_action_spaces), (
             f"The algorithm only supports {supported_action_spaces} as action spaces "
