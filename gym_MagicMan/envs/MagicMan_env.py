@@ -2,6 +2,8 @@ import gym
 from gym import error, spaces, utils
 from gym.spaces import Dict,Box,Discrete
 
+import warnings
+
 import numpy as np
 import torch
 import random
@@ -17,6 +19,9 @@ from gym_MagicMan.envs.utils.players.MagicManAdversary_Trained import TrainedAdv
 import gym_MagicMan.envs.utils.MagicManRender as mm_render
 import gym_MagicMan.envs.utils.MagicManDeck as deck
 
+
+warnings.warn("the error might be that the action space is defined as 'gym.spaces.Discrete' not 'gymnasium.spaces etc...'")
+warnings.warn("which would be stupid")
 
 class MagicManEnv(gym.Env):
     metadata = {'render.modes': ['human','human_interactive'], "render_fps": 30}
@@ -121,7 +126,7 @@ class MagicManEnv(gym.Env):
         
         self.flat_obs_space = gym.spaces.utils.flatten_space(self.observation_space)
     
-        self.action_space = gym.spaces.discrete.Discrete(60)
+        self.action_space = gym.spaces.discrete.Discrete#(60)
         self.action_mask = torch.zeros(60)
     
         

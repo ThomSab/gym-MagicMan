@@ -1,12 +1,10 @@
-import gym
+import gymnasium as gym
 import gym_MagicMan
 
 import torch
 import os
 import time
-
-import wandb
-from wandb.integration.sb3 import WandbCallback
+import sys
 
 from stable_baselines3 import A2C,PPO
 from stable_baselines3.common import env_checker
@@ -19,6 +17,8 @@ from sb3_contrib.ppo_mask import MaskablePPO
 
 from gym_MagicMan.envs.utils.players.MagicManAdversary_Trained import TrainedAdversary
     
+import wandb
+from wandb.integration.sb3 import WandbCallback
 
 def linear_schedule(initial_value):
     """
@@ -66,6 +66,13 @@ def make_env(config=config):
     env.seed(config["seed"])
     env = Monitor(env)
     env = gym.wrappers.FlattenObservation(env)
+
+    supported_action_spaces = (gymnasium.spaces.discrete.Discrete,gymnasium.spaces.multi_discrete.MultiDiscrete,gymnasium.spaces.multi_binary.MultiBinary)
+    if supported_action_spaces is not None:
+        assert isinstance(env.action_space, supported_action_spaces), (
+            f"The algorithm only supports {supported_action_spaces} as action spaces "
+            f"but {self.action_space} was provided")
+    
     return env
 
 def mask_fn(env: gym.Env) -> torch.Tensor:
@@ -79,6 +86,7 @@ def train(config,resume_id=None,local=False,save_path=None):
 
     env = make_env(config)
     env = ActionMasker(env, mask_fn)
+
 
     if local:
         train_local_test(env=env,config=config)
