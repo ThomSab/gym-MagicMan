@@ -64,7 +64,7 @@ def make_env(config=config):
                    current_round=config["current_round"],
                    adversaries=config["adversaries"])
                    
-    if config["seed"]:
+    if "seed" in config.keys():
         env.seed(config["seed"])
     env = Monitor(env)
     env = gym.wrappers.FlattenObservation(env)
