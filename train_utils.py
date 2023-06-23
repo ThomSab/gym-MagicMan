@@ -6,6 +6,9 @@ import os
 import time
 import sys
 
+import wandb
+from wandb.integration.sb3 import WandbCallback
+
 from stable_baselines3 import A2C,PPO
 from stable_baselines3.common import env_checker
 from stable_baselines3.common.logger import configure
@@ -16,9 +19,6 @@ from sb3_contrib.common.wrappers import ActionMasker
 from sb3_contrib.ppo_mask import MaskablePPO
 
 from gym_MagicMan.envs.utils.players.MagicManAdversary_Trained import TrainedAdversary
-    
-import wandb
-from wandb.integration.sb3 import WandbCallback
 
 def linear_schedule(initial_value):
     """
@@ -62,8 +62,7 @@ experiment_name = f"CPU_MPPO_R{config['current_round']}_{int(time.time())}"
 def make_env(config=config):
     env = gym.make(config["env_name"],
                    current_round=config["current_round"],
-                   adversaries=config["adversaries"],
-                   apply_api_compatibility=True)
+                   adversaries=config["adversaries"])
                    
     if "seed" in config.keys():
         env.reset(seed=config["seed"])
@@ -85,23 +84,23 @@ def profile():
     cProfile.run("model.learn(total_timesteps=100000)")    
 
 
-def train(config,resume_id=None,local=False,save_path=None):
+def train(config,resume_id=None,test=False,save_path=None):
 
     env = make_env(config)
     env = ActionMasker(env, mask_fn)
 
 
-    if local:
-        train_local_test(env=env,config=config)
+    if test:
+        train_test(env=env,config=config)
     else:
-        assert save_path, "When training online, save_path variable must be passed to training method."
-        train_online(env=env,resume_id=resume_id,config=config,save_path=save_path)
+        assert save_path, "When training on gpu, save_path variable must be passed to training method."
+        train_gpu(env=env,resume_id=resume_id,config=config,save_path=save_path)
   
   
-def train_local_test(env,config):
+def train_test(env,config):
 
     resume = False
-    config["run_id"] = wandb.util.generate_id() + "_LOCALRUN"
+    config["run_id"] = wandb.util.generate_id() + "_TESTRUN"
 
 
     experiment_name = f"GPU_MPPO_R{config['current_round']}_{config['run_id']}"
@@ -126,13 +125,13 @@ def train_local_test(env,config):
                                        model_save_path=None))
 
 
-def train_online(env,config,resume_id,save_path):
+def train_gpu(env,config,resume_id,save_path):
 
     if not resume_id:
         config['run_id'] = wandb.util.generate_id()
-        model = online_init(config,env)
+        model = gpu_init(config,env)
     else:
-        model, config = online_resume(resume_id,save_path,env)
+        model, config = gpu_resume(resume_id,save_path,env)
 
     model.learn(total_timesteps=config["total_timesteps"],
                 callback=WandbCallback(gradient_save_freq=10_000,
@@ -140,7 +139,7 @@ def train_online(env,config,resume_id,save_path):
                                        model_save_freq=10_000,
                                        model_save_path=f"{save_path}/{wandb.run.name}"))
 
-def online_init(config,env):
+def gpu_init(config,env):
 
     experiment_name = f"GPU_MPPO_R{config['current_round']}_{config['run_id']}"
     wandb.init(
@@ -156,7 +155,7 @@ def online_init(config,env):
     return model
 
 
-def online_resume(resume_id,save_path,env):    
+def gpu_resume(resume_id,save_path,env):    
 
     wandb.init(project="MagicManGym",
                id=resume_id,
@@ -186,13 +185,14 @@ def make_new_model(config,env):
                         gamma = config["gamma"],
                         gae_lambda = config["gae_lambda"],
                         batch_size=config["batch_size"],
+                        n_steps=config["n_steps"],
                         policy_kwargs = config["policy_kwargs"],
                         tensorboard_log=f"runs/{experiment_name}")
     return model
 
 
 if __name__ == "__main__":
-    raise UserWarning("'train_utils.py' is not supposed to be called directly and contains only utility functions. Maybe you meant to call 'local_train_test.py'")
+    raise UserWarning("'train_utils.py' is not supposed to be called directly and contains only utility functions. Maybe you meant to call 'train_test.py'")
 
 
 

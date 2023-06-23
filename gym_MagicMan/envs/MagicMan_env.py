@@ -19,20 +19,22 @@ from gym_MagicMan.envs.utils.players.MagicManAdversary_Trained import TrainedAdv
 import gym_MagicMan.envs.utils.MagicManRender as mm_render
 import gym_MagicMan.envs.utils.MagicManDeck as deck
 
-
-warnings.warn("the error might be that the action space is defined as 'gym.spaces.Discrete' not 'gymnasium.spaces etc...'")
-warnings.warn("which would be stupid")
-
 class MagicManEnv(gym.Env):
     metadata = {'render.modes': ['human','human_interactive'], "render_fps": 30}
 
     def __init__(self,init_state=None,adversaries='random',render_mode=None,verbose=False,verbose_obs=False,current_round=15):
-        
-        self.device = 'cuda' if torch.cuda.is_available() else 'cpu'        
+
+        if render_mode=='human_interactive':
+            self.device = 'cpu'
+        elif torch.cuda.is_available():
+            self.device = 'cuda'
+        else:
+            self.device = 'cpu'        
         
         self.verbose = verbose
         self.verbose_obs= verbose_obs
         self.render_mode = render_mode
+        
         
         self.single_obs_space=395
         
@@ -138,7 +140,8 @@ class MagicManEnv(gym.Env):
         print("Bid input is not ordered. Has to be implemented in the future.")
         self.r = 0
         self.info = {player.name:0 for player in self.players}
-        self.done = False
+        self.terminated = False
+        self.truncated = False
         
         self.window = None
         self.clock = None
@@ -149,7 +152,7 @@ class MagicManEnv(gym.Env):
         return torch.from_numpy(gym.spaces.flatten(self.observation_space,obs_dict)).to(self.device)
     
     def reset(self,seed=None,options=None):
-    
+        
         if seed:
             super().reset(seed=seed)
             random.seed(seed)
@@ -176,7 +179,8 @@ class MagicManEnv(gym.Env):
         self.bid_obs = None
         self.r = 0
         self.info = {player.name:0 for player in self.players}
-        self.done = False
+        self.terminated = False
+        self.truncated = False
 
         for player in self.noorder_players:
             player.round_suits = 0
@@ -214,9 +218,9 @@ class MagicManEnv(gym.Env):
            
        
         self.give_out_cards()
-        obs,r,done,info = self.init_bid_step()
+        obs,r,terminated,truncated,info = self.init_bid_step()
    
-        return obs
+        return obs, info
 
     
 
@@ -295,15 +299,16 @@ class MagicManEnv(gym.Env):
         self.bids = torch.full(tuple([self.n_players]),float(round(self.current_round/self.n_players)))#bids that are not yet given become 0 (bids are normalized so 0 is the expected bid)
 
         self.bid_idx = 0
-        self.done = False
+        self.terminated = False
+        self.truncated = False
         self.r,self.info = 0,{player.name:0 for player in self.players}
 
         if active_bid:
-            self.bid_obs, self.r, self.done, self.info = self.bid_step(action=None,active_bid=active_bid)
-            return self.bid_obs.numpy(), self.r, self.done, self.info
+            self.bid_obs, self.r, self.terminated, self.truncated, self.info = self.bid_step(action=None,active_bid=active_bid)
+            return self.bid_obs.numpy(), self.r, self.terminated, self.truncated, self.info
         else:
-            obs, self.r, self.done, self.info = self.bid_step(action=None,active_bid=active_bid)
-            return obs, self.r, self.done, self.info
+            obs, self.r, self.terminated, self.truncated, self.info = self.bid_step(action=None,active_bid=active_bid)
+            return obs, self.r, self.terminated, self.truncated, self.info
                         
     def bid_step(self,action,active_bid=False): # !!not turn
         
@@ -348,7 +353,7 @@ class MagicManEnv(gym.Env):
                 if active_bid:
                     raise UserWarning (f"Active bidding is not intended for Train Player --> active_bid flag is {active_bid}")
                     self.bid_obs = player_obs
-                    return self.bid_obs, self.r, self.done, self.info
+                    return self.bid_obs, self.r, self.terminated, self.truncated, self.info
                 else:
                     player.current_bid = round(self.current_round/self.n_players)
                     self.bids[self.bid_idx] = player.current_bid
@@ -364,8 +369,8 @@ class MagicManEnv(gym.Env):
         self.turn_idx = 0
         self.current_suit_idx = 5
         self.current_suit = torch.zeros(6)
-        flat_round_obs ,self.r, self.done, self.info = self.step(action = None)
-        return flat_round_obs, self.r, self.done, self.info
+        flat_round_obs ,self.r, self.terminated, self.truncated, self.info = self.step(action = None)
+        return flat_round_obs, self.r, self.terminated, self.truncated, self.info
             
     def step(self,action): #!!not round
                 
@@ -376,7 +381,12 @@ class MagicManEnv(gym.Env):
                 print(f"Train Player action: {deck.deck[action]}")
             played_card = deck.deck[action]
             self.turn_cards.append(played_card)
-            self.train_player.cards_obj.remove(played_card)
+            try:
+                self.train_player.cards_obj.remove(played_card)
+            except ValueError:
+                        print(f"{self.train_player} Intended Card: {played_card}")
+                        print(f"{self.train_player} Hand: {self.train_player.cards_obj}")
+                        print(f"{self.train_player} Action: {action}")
             self.turnorder_idx +=1
             
             
@@ -456,7 +466,13 @@ class MagicManEnv(gym.Env):
                     if self.verbose:
                         print(f"{player} Intended Card: {played_card}")
 
-                    player.cards_obj.remove(played_card)
+                    try:
+                        player.cards_obj.remove(played_card)
+                    except ValueError:
+                        print(f"{player} Intended Card: {played_card}")
+                        print(f"{player} Hand: {player.cards_obj}")
+                        print(f"{player} Action: {net_out}")
+                    
                     self.turn_cards.append(played_card)
                     self.turnorder_idx +=1
                     #--> go round the circle again
@@ -467,7 +483,7 @@ class MagicManEnv(gym.Env):
                         print(f"Train Player action mask: {self.action_mask}")
                     dict_round_obs = player_obs
 
-                    return dict_round_obs, self.r, self.done, self.info
+                    return dict_round_obs, self.r, self.terminated, self.truncated, self.info
                     
                 else:
                     raise UserWarning (f"Player is {type(player)} not instance of either AdversaryPlayer or TrainPlayer")            
@@ -551,7 +567,8 @@ class MagicManEnv(gym.Env):
             
             if isinstance(player,TrainPlayer):
                 self.r = round_reward
-                self.done = True
+                self.terminated = True
+                self.truncated = False
                 self.info[player.name] = player.current_bid-player.round_suits
                 self.info[player.name] = player.current_bid-player.round_suits
                 
@@ -564,7 +581,7 @@ class MagicManEnv(gym.Env):
             
         final_obs = self.train_player.round_obs
 
-        return final_obs,self.r,self.done,self.info
+        return final_obs,self.r,self.terminated,self.truncated,self.info
 
 
 
@@ -583,12 +600,13 @@ if __name__ == "__main__":
         print(f"{player.name} total score is {player.total_score} points.\n")
     
     for _ in range(100):
-        done = False
+        terminated = False
+        truncated = False
         obs = env.reset()
         round_idx=0
-        while not done:
+        while not terminated:
             action = env.render()
-            obs, r, done, info = env.step(action)
+            obs, r, terminated, truncated, info = env.step(action)
             round_idx+=1
             
         env.render(last_step=True)

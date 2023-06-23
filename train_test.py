@@ -28,4 +28,4 @@ if __name__ == "__main__":
             }
 
 
-    train_utils.train(config=config,local=True)
+    train_utils.train(config=config,test=True)
