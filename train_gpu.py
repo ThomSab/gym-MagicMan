@@ -39,27 +39,27 @@ import train_utils
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 Transition = namedtuple("Transition", ["state", "action", "reward", "next_state", "done"])
-torch.cuda.set_per_process_memory_fraction(0.8, 0)
+torch.cuda.set_per_process_memory_fraction(.9, 0)
 print(device)
 
-resume_id = "7kutlo76"
+resume_id = None#"j4dhifyv"
 save_path = "MagicManSavedModels"
 
-config={"run_id":None,
+config={"run_id":resume_id,
         "policy_type": "MlpPolicy",
-        "learning_rate":3e-6,#linear_schedule(1e-3)
-        "batch_size":8192,
-        "n_steps":4096,
-        "total_timesteps":10_000_000,
+        "learning_rate":1e-4,#linear_schedule(1e-3)
+        "batch_size":2048,
+        "n_steps":32768,
+        "total_timesteps":100_000_000,
         "env_name": "MagicMan-v0",
         "seed":262144,
-        "current_round": 9,
+        "current_round": 4,
         "adversaries":"random",
         "clip_range":0.2,#0.2
-        "ent_coef":0.0,#0.0
-        "vf_coef":0.5,#0.5
+        "ent_coef":0.01,#0.0
+        "vf_coef":0.01,#0.5
         "normalize_advantage":True,
-        "n_epochs":500,
+        "n_epochs":10,
         "gamma":1,#0.99
         "gae_lambda":0.95,#0.95
         "policy_kwargs":dict(activation_fn=torch.nn.ReLU,net_arch=dict(pi=[2048,2048], vf=[2048,2048]))}

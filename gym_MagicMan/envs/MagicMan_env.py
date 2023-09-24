@@ -380,13 +380,23 @@ class MagicManEnv(gym.Env):
             if self.verbose:
                 print(f"Train Player action: {deck.deck[action]}")
             played_card = deck.deck[action]
+            
+            if not (played_card.legal==True):
+                    print(f"Train Player is playing a card in their hand that is not legal: {played_card}")
+            
+            if (not played_card in self.train_player.cards_obj) or (not played_card.legal==True):
+                print(f"{self.train_player.name} Intended Card: {played_card}")
+                print(f"{self.train_player.name} Hand: {self.train_player.cards_obj}")
+                played_card = random.choice([card for card in self.train_player.cards_obj if card.legal==True])
+                print(f"{played_card} is {'legal.' if played_card.legal==True else 'not legal.'}")
+                print(f"{self.train_player.name} instead plays random action: {played_card}")
+                
+                
+                    
+                
             self.turn_cards.append(played_card)
-            try:
-                self.train_player.cards_obj.remove(played_card)
-            except ValueError:
-                        print(f"{self.train_player} Intended Card: {played_card}")
-                        print(f"{self.train_player} Hand: {self.train_player.cards_obj}")
-                        print(f"{self.train_player} Action: {action}")
+            self.train_player.cards_obj.remove(played_card)
+
             self.turnorder_idx +=1
             
             
@@ -434,7 +444,7 @@ class MagicManEnv(gym.Env):
                         
                         
                 self.action_mask=player.turn_obs["legal_cards_tensor"]
-                assert sum(self.action_mask)>0 or not player.cards_obj, f"{player} has no valid moves: {player.cards_obj}"
+                assert sum(self.action_mask)>0 or not player.cards_obj, f"{player.name} has no valid moves: {player.cards_obj}"
 
 
                 for card_idx in range(len(self.turn_cards)):
@@ -464,15 +474,22 @@ class MagicManEnv(gym.Env):
                     
                     played_card = deck.deck[action_idx]
                     if self.verbose:
-                        print(f"{player} Intended Card: {played_card}")
+                        print(f"{player.name} Intended Card: {played_card}")
 
-                    try:
-                        player.cards_obj.remove(played_card)
-                    except ValueError:
-                        print(f"{player} Intended Card: {played_card}")
-                        print(f"{player} Hand: {player.cards_obj}")
-                        print(f"{player} Action: {net_out}")
+                    if (not played_card.legal==True):
+                            print(f"Adversary Player is playing a card in their hand that is not legal: {played_card}")
                     
+                    if (not played_card in player.cards_obj) or (not played_card.legal==True):
+                        print(f"{player.name} Intended Card: {played_card}")
+                        print(f"{player.name} Hand: {player.cards_obj}")
+                        played_card = random.choice([card for card in player.cards_obj if card.legal==True])
+                        print(f"{played_card} is {'legal.' if played_card.legal==True else 'not legal.'}")
+                        print(f"{player.name} instead plays random action: {played_card}")
+                    
+                        
+                    
+                    player.cards_obj.remove(played_card)
+
                     self.turn_cards.append(played_card)
                     self.turnorder_idx +=1
                     #--> go round the circle again
@@ -561,7 +578,7 @@ class MagicManEnv(gym.Env):
             if player.current_bid == player.round_suits:
                 round_reward = player.current_bid + 2 #ten point for every turn won and 20 for guessing right
             else:
-                round_reward =  -abs(player.current_bid-player.round_suits) #ten points for every falsly claimed suit
+                round_reward = -abs(player.current_bid-player.round_suits) #ten points for every falsly claimed suit
             
             player.round_r = round_reward
             
@@ -588,7 +605,7 @@ class MagicManEnv(gym.Env):
 
 
 if __name__ == "__main__":
-    current_round=8
+    current_round=15
 
     env = gym.make("MagicMan-v0",adversaries='trained',current_round=current_round,render_mode='human_interactive',verbose=False)#,current_round=2,verbose=0,verbose_obs=0)
 

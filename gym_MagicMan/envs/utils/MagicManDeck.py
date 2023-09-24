@@ -64,7 +64,7 @@ def turn_value (cards,current_suit,trump=0): #turn value --> value is the index 
         suit = current_suit #suit --> welche farbe angespielt wurde
     
     for card in cards:
-        if card.legal:
+        if card.legal==True:
             if   card.value == 14:
                 card.turn_value = 60 - cards.index(card)
                 
@@ -84,6 +84,7 @@ def turn_value (cards,current_suit,trump=0): #turn value --> value is the index 
                 raise UserWarning(f'ERROR invalid card turn value for {str(card)}')
                 return
         else:
+            print(f"Cards: {cards}")
             raise UserWarning(f'ERROR invalid card turn value for {str(card)}')
             card.turn_value = 'N/A' #to be disregarded
 
