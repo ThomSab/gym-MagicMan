@@ -43,6 +43,7 @@ config={"policy_type": "MlpPolicy",
         "learning_rate":linear_schedule(1e-3),#3e-4
         "batch_size":128,
         "total_timesteps":1_000_000,
+        "save_freq":10,
         "env_name": "MagicMan-v0",
         "current_round": 8,
         "adversaries":'naive',
@@ -119,9 +120,9 @@ def train_test(env,config):
     model = make_new_model(config,env)
 
     model.learn(total_timesteps=config["total_timesteps"],
-                callback=WandbCallback(gradient_save_freq=0,
+                callback=WandbCallback(gradient_save_freq=config["save_freq"],
                                        verbose=2,
-                                       model_save_freq=0,
+                                       model_save_freq=config["save_freq"],
                                        model_save_path=None))
 
 
@@ -134,9 +135,9 @@ def train_gpu(env,config,resume_id,save_path):
         model, config = gpu_resume(resume_id,save_path,env)
 
     model.learn(total_timesteps=config["total_timesteps"],
-                callback=WandbCallback(gradient_save_freq=10_000,
+                callback=WandbCallback(gradient_save_freq=10,
                                        verbose=2,
-                                       model_save_freq=10_000,
+                                       model_save_freq=10,
                                        model_save_path=f"{save_path}/{wandb.run.name}"))
 
 def gpu_init(config,env):

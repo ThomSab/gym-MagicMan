@@ -51,6 +51,7 @@ config={"run_id":resume_id,
         "batch_size":2048,
         "n_steps":32768,
         "total_timesteps":100_000_000,
+        "save_freq":10
         "env_name": "MagicMan-v0",
         "seed":262144,
         "current_round": 4,
