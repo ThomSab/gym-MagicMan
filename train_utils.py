@@ -135,9 +135,9 @@ def train_gpu(env,config,resume_id,save_path):
         model, config = gpu_resume(resume_id,save_path,env)
 
     model.learn(total_timesteps=config["total_timesteps"],
-                callback=WandbCallback(gradient_save_freq=config["save_freq"],,
+                callback=WandbCallback(gradient_save_freq=config["save_freq"],
                                        verbose=2,
-                                       model_save_freq=config["save_freq"],,
+                                       model_save_freq=config["save_freq"],
                                        model_save_path=f"{save_path}/{wandb.run.name}"))
 
 def gpu_init(config,env):
