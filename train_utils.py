@@ -85,7 +85,7 @@ def profile():
     cProfile.run("model.learn(total_timesteps=100000)")    
 
 
-def train(config,resume_id=None,test=False,save_path=None):
+def train(config,resume_id=None,model_id=None,test=False,save_path=None):
 
     env = make_env(config)
     env = ActionMasker(env, mask_fn)
@@ -95,7 +95,7 @@ def train(config,resume_id=None,test=False,save_path=None):
         train_test(env=env,config=config,save_path=save_path)
     else:
         assert save_path, "When training on gpu, save_path variable must be passed to training method."
-        train_gpu(env=env,resume_id=resume_id,config=config,save_path=save_path)
+        train_gpu(env=env,resume_id=resume_id,model_id=model_id,config=config,save_path=save_path)
   
   
 def train_test(env,config,save_path=None):
@@ -126,13 +126,13 @@ def train_test(env,config,save_path=None):
                                        model_save_path=save_path))
 
 
-def train_gpu(env,config,resume_id,save_path):
+def train_gpu(env,config,resume_id,model_id,save_path):
 
     if not resume_id:
         config['run_id'] = wandb.util.generate_id()
         model = gpu_init(config,env)
     else:
-        model, config = gpu_resume(resume_id,save_path,env)
+        model, config = gpu_resume(resume_id,model_id,save_path,env)
 
     model.learn(total_timesteps=config["total_timesteps"],
                 callback=WandbCallback(gradient_save_freq=config["save_freq"],
@@ -156,15 +156,16 @@ def gpu_init(config,env):
     return model
 
 
-def gpu_resume(resume_id,save_path,env):    
+def gpu_resume(resume_id,model_id,save_path,env):    
 
+    
     wandb.init(project="MagicManGym",
                id=resume_id,
                sync_tensorboard=True,
                monitor_gym=True,
                resume="must")
-    config = wandb.run.config        
-    model = MaskablePPO.load(f"{save_path}/{wandb.run.name}"+r"/model",env=env)
+    config = wandb.run.config
+    model = MaskablePPO.load(f"{save_path}/GPU_MPPO_R{config['current_round']}_{model_id}"+r"/model",env=env)
     return model,config
 
 

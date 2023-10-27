@@ -43,13 +43,14 @@ torch.cuda.set_per_process_memory_fraction(.9, 0)
 print(device)
 
 resume_id = None#"j4dhifyv"
+model_id = "j4dhifyv"
 save_path = "MagicManSavedModels"
 
 config={"run_id":resume_id,
         "policy_type": "MlpPolicy",
         "learning_rate":1e-4,#linear_schedule(1e-3)
         "batch_size":2048,
-        "n_steps":32768,
+        "n_steps":512,
         "total_timesteps":100_000_000,
         "save_freq":10,
         "env_name": "MagicMan-v0",
@@ -69,4 +70,5 @@ config={"run_id":resume_id,
 
 train_utils.train(config=config,
                   resume_id=resume_id,
+                  model_id=model_id,
                   save_path=save_path)
