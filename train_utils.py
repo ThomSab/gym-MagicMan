@@ -130,7 +130,7 @@ def train_gpu(env,config,resume_id,model_id,save_path):
 
     if not resume_id:
         config['run_id'] = wandb.util.generate_id()
-        model = gpu_init(config,env)
+        model = gpu_init(config,model_id,save_path,env)
     else:
         model, config = gpu_resume(resume_id,model_id,save_path,env)
 
@@ -140,7 +140,7 @@ def train_gpu(env,config,resume_id,model_id,save_path):
                                        model_save_freq=config["save_freq"],
                                        model_save_path=f"{save_path}/{wandb.run.name}"))
 
-def gpu_init(config,env):
+def gpu_init(config,model_id,save_path,env):
 
     experiment_name = f"GPU_MPPO_R{config['current_round']}_{config['run_id']}"
     wandb.init(
@@ -152,7 +152,10 @@ def gpu_init(config,env):
                 monitor_gym=True,  # auto-upload the videos of agents playing the game
                 resume = False
         )
-    model = make_new_model(config,env)
+    if not model_id:
+        model = make_new_model(config,env)
+    else:
+        model = MaskablePPO.load(f"{save_path}/GPU_MPPO_R{config['current_round']}_{model_id}"+r"/model",env=env)    
     return model
 
 
