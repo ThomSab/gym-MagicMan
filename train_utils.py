@@ -92,13 +92,13 @@ def train(config,resume_id=None,test=False,save_path=None):
 
 
     if test:
-        train_test(env=env,config=config)
+        train_test(env=env,config=config,save_path=save_path)
     else:
         assert save_path, "When training on gpu, save_path variable must be passed to training method."
         train_gpu(env=env,resume_id=resume_id,config=config,save_path=save_path)
   
   
-def train_test(env,config):
+def train_test(env,config,save_path=None):
 
     resume = False
     config["run_id"] = wandb.util.generate_id() + "_TESTRUN"
@@ -123,7 +123,7 @@ def train_test(env,config):
                 callback=WandbCallback(gradient_save_freq=config["save_freq"],
                                        verbose=2,
                                        model_save_freq=config["save_freq"],
-                                       model_save_path=None))
+                                       model_save_path=save_path))
 
 
 def train_gpu(env,config,resume_id,save_path):

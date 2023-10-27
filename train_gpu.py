@@ -55,7 +55,7 @@ config={"run_id":resume_id,
         "env_name": "MagicMan-v0",
         "seed":262144,
         "current_round": 4,
-        "adversaries":"random",
+        "adversaries":"trained",
         "clip_range":0.2,#0.2
         "ent_coef":0.01,#0.0
         "vf_coef":0.01,#0.5

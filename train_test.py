@@ -12,11 +12,13 @@ if __name__ == "__main__":
             "policy_type": "MlpPolicy",
             "learning_rate":6e-4,#linear_schedule(1e-3)
             "batch_size":256,
+            "n_steps":32768,
             "total_timesteps":50_000_000,
+            "save_freq":10,
             "env_name": "MagicMan-v0",
             "seed":262144,
             "current_round": 8,
-            "adversaries":"random",
+            "adversaries":"trained",
             "clip_range":0.3,#0.2
             "ent_coef":0.0,#0.0
             "vf_coef":0.5,#0.5
@@ -27,5 +29,5 @@ if __name__ == "__main__":
             "policy_kwargs":dict(activation_fn=torch.nn.ReLU,net_arch=dict(pi=[1024,1024], vf=[1024,1024]))
             }
 
-
-    train_utils.train(config=config,test=True)
+    save_path = "MagicManSavedModels"
+    train_utils.train(config=config,test=True,save_path=save_path)

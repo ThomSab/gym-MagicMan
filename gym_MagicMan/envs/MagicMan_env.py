@@ -52,7 +52,7 @@ class MagicManEnv(gym.Env):
             self.players = [NaiveAdversary() for _ in range(3)]
         elif adversaries == 'trained':
             self.flat_out = True
-            self.players = [TrainedAdversary(f"models/TrainedAdversary_R{self.current_round}/model") for _ in range(3)]
+            self.players = [TrainedAdversary(f"models/TrainedAdversary_R{self.current_round}/model",device=self.device) for _ in range(3)]
             
         
         self.train_player = TrainPlayer()
@@ -148,8 +148,11 @@ class MagicManEnv(gym.Env):
         self.window_size = (1000,700)
         self.activate_cards_buttons = mm_render.activate_cards_buttons
     
-    def get_flat(self,obs_dict):
+    def get_flat(self,obs_dict,array_out=False):
+        if array_out:
+            return gym.spaces.flatten(self.observation_space,obs_dict)
         return torch.from_numpy(gym.spaces.flatten(self.observation_space,obs_dict)).to(self.device)
+
     
     def reset(self,seed=None,options=None):
         
@@ -467,7 +470,7 @@ class MagicManEnv(gym.Env):
                         print(f"Adverse Player Observation: {player_obs}")
                     #action is input not output!!!
                     if self.flat_out:
-                        flat_round_obs = self.get_flat(player_obs)
+                        flat_round_obs = self.get_flat(player_obs,array_out=True)
                         player_obs = flat_round_obs
                     net_out = player.play(player_obs,self.action_mask)
                     action_idx = net_out

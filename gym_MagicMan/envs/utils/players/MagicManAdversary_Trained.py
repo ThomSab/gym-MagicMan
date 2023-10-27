@@ -11,11 +11,12 @@ from sb3_contrib.ppo_mask import MaskablePPO
 
 class TrainedAdversary(AdversaryPlayer):
 
-    def __init__(self,load_path):
+    def __init__(self,load_path,device):
         super().__init__()
 
+        self.device = device
         self.name = "TrainedAdversary"+str(self.random_id)
-        self.model = MaskablePPO.load(load_path)
+        self.model = MaskablePPO.load(load_path,device=device)
              
         
         
