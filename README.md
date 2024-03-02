@@ -4,7 +4,7 @@ Including a training algorithm for the games adversaries.
 
 ## Requirements
 
-- python 3.7 - 3.9
+- python 3.8 or later
 - Windows 10 / 11
 - Not sure about MacOs or Linux-based OS
 
@@ -12,7 +12,7 @@ Including a training algorithm for the games adversaries.
 - numpy
 - torch
 - pygame
-- gym
+- gymnasium
 - stable-baselines3
 - sb3-contrib
 
@@ -20,6 +20,8 @@ Including a training algorithm for the games adversaries.
 Inside gym-MagicMan directory open shell and execute:
 
  " py -m pip install -e . "
+ 
+(-editable flag is only necessary if you want to edit the code after install)
  
 ## Run
 Execute "MagicMan_env.py" inside
