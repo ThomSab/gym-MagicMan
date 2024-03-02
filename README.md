@@ -12,7 +12,7 @@ It's possible that an agent trained with PPO as I have been doing it, is not cap
 But there is a number of things that I have thought of that could still bring some hope:
  - Pre-Training the Agent on human data. Possible but I haven't looked into where I could acquire data like this.
  - There might be a better way to pass information from the environment to the agent. This might be a bit harder to explain so I'll elaborate when I write a more detailed post.
- - Actual literature research - I have not seriously looked into maschine learning literature on trick-taking card games so there might be some helpful puplications on this topic. 
+ - Actual literature research - I have not seriously looked into machine learning literature on trick-taking card games so there might be some helpful publications on this topic. 
 
 
 ## Requirements
