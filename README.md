@@ -23,7 +23,7 @@ There is however, a number of things that bear promise in my opinion:
 
 - python 3.8 or later
 - Windows 10 / 11
-- Not sure about MacOs or Linux-based OS
+- MacOs or Linux-based OS havent been tested
 
 ## Required Modules
 - numpy
