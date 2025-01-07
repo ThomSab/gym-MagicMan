@@ -1,6 +1,6 @@
 # gym-MagicMan
 
-Magic Man is a Deep Reinforcement Learning Project that I have been working on and off on since maybe as early as 2020.
+Magic Man is a Deep Reinforcement Learning Project that I have been working on and off on since maybe as early as 2020. Since then the approach has changed a number of times. I have for example applied a genetic algorithm ( Neuro-Evolution of Augmenting Topologies aka. NEAT) to the problem. 
 
 The approach is straight forward. I want to implement an agent for [Wizard](https://en.wikipedia.org/wiki/Wizard_(card_game)) the card game. If you have never heard of the game before: It is - in a nutshell- a trick-taking card game where you have to predict the amount of tricks that you win each round. Players are rewarded points when they manage to predict the exact amount of tricks but lose points if the prediction is wrong. The goal of the game is therefore not to gain as many tricks as possible as is the case for the majority of trick-taking card games like for example Doppelkopf, but instead to assess the outcome of the game corectly.
 
