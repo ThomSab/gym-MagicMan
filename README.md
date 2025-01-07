@@ -14,9 +14,9 @@ The image below show the average score over the duration of training. Human aver
 
 Simply using PPO without any form of pre-training appears to be incapable of achieving better-that-human performance in Wizards.
 There is however, a number of things that bear promise in my opinion:
- - pre-training the agent on human data. Its possible to play Wizards on online platforms. Using this data to pre-train an agent would set it up better that starting from a randomly initiated agent. Agents like AlphaGo have been developed in a similar fashion.
- - Train an encoder for the environment. Learning an embedding for the environment would provide a better foundation for further training. This can be done in similar ways that are similar to the methods used to train BERT encoders i.e. Masked State Prediction, Next-State Prediction or Contrastive Learning.
- - Structured literature research - I have not systematically read through the literature on this topic, there is an abundance of precedence on this topic. The project itself has been to me more of a trying-it-by-myself approach with an emphasis on tinkering rather that actual research and development.
+ - Pre-training the agent on **human data**. Its possible to play Wizards on online platforms. Using this data to pre-train an agent would set it up better that starting from a randomly initiated agent. Agents like AlphaGo have been developed in a similar fashion.
+ - Train an encoder for the environment. Learning an **embedding for the environment** would provide a better foundation for further training. This can be done in similar ways that are similar to the methods used to train BERT encoders i.e. Masked State Prediction, Next-State Prediction or Contrastive Learning.
+ - **Structured literature research** - I have not systematically read through the literature on this topic, there is an abundance of precedence on this topic. The project itself has been to me more of a trying-it-by-myself approach with an emphasis on tinkering rather that actual research and development.
 
 
 ## Requirements
