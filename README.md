@@ -4,17 +4,19 @@ Magic Man is a Deep Reinforcement Learning Project that I have been working on a
 
 The approach is straight forward. I want to implement an agent for [Wizard](https://en.wikipedia.org/wiki/Wizard_(card_game)) the card game. If you have never heard of the game before: It is - in a nutshell- a trick-taking card game where you have to predict the amount of tricks that you win each round. Players are rewarded points when they manage to predict the exact amount of tricks but lose points if the prediction is wrong. The goal of the game is therefore not to gain as many tricks as possible as is the case for the majority of trick-taking card games like for example Doppelkopf, but instead to assess the outcome of the game corectly.
 
-I have implemented the game in python as a [gymnasium](https://gymnasium.farama.org/) environment as well as a number of algorithms that I thought would be interesting to try. The current approach is to run the [Stable Baselines 3](https://stable-baselines3.readthedocs.io/en/master/modules/ppo.html) implementation of a [Proximal Policy Optimization Algorithm](https://arxiv.org/abs/1707.06347) and have it play first against randomly acting adversaries and then have it play against other versions of itself. In theory, training would go on until the trained agent surpasses human level of play.
+I have implemented the game in python as a [gymnasium](https://gymnasium.farama.org/) environment as well as a number of algorithms that I thought would be interesting to try. The current approach is to run the [Stable Baselines 3](https://stable-baselines3.readthedocs.io/en/master/modules/ppo.html) implementation of a [Proximal Policy Optimization Algorithm](https://arxiv.org/abs/1707.06347) and have it play first against randomly acting adversaries and then have it play against other versions of itself. Increase in the quality of the agents play slows down over time and is not likely to reach the niveau of skill that is comparable to humans.
+
+The image below show the average score over the duration of training. Human average score is around 20, whereas these agents will likely never go beyond 2.
 
 <div>
-<img src="https://private-user-images.githubusercontent.com/64082072/309466774-380558b2-a992-4ac5-8586-e9f2959d9d5e.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MDkzNzUyNjYsIm5iZiI6MTcwOTM3NDk2NiwicGF0aCI6Ii82NDA4MjA3Mi8zMDk0NjY3NzQtMzgwNTU4YjItYTk5Mi00YWM1LTg1ODYtZTlmMjk1OWQ5ZDVlLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNDAzMDIlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjQwMzAyVDEwMjI0NlomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTVmZmI3MDk2MGU2NDk1NWMzMjIzZmQyYmY5YjhmNWQzODQ4ZWVkMjcwM2U3NDcwMWMzOTM4OWYxYzUyNWZjYjcmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0JmFjdG9yX2lkPTAma2V5X2lkPTAmcmVwb19pZD0wIn0.71emk1b9T7-rDnuNYx-0zD4unDYANOm0yhiZ0Ufgw_Mdrawing.jpg" alt="training progress" width="500"/>
+<img src="score curves.png" alt="training progress" width="1000"/>
 </div>
 
-It's possible that an agent trained with PPO as I have been doing it, is not capable of achieving better-that-human performance in Wizards.
-But there is a number of things that I have thought of that could still bring some hope:
- - Pre-Training the Agent on human data. Possible but I haven't looked into where I could acquire data like this.
- - There might be a better way to pass information from the environment to the agent. This might be a bit harder to explain so I'll elaborate when I write a more detailed post.
- - Actual literature research - I have not seriously looked into machine learning literature on trick-taking card games so there might be some helpful publications on this topic. 
+Simply using PPO without any form of pre-training appears to be incapable of achieving better-that-human performance in Wizards.
+There is however, a number of things that bear promise in my opinion:
+ - pre-training the agent on human data. Its possible to play Wizards on online platforms. Using this data to pre-train an agent would set it up better that starting from a randomly initiated agent. Agents like AlphaGo have been developed in a similar fashion.
+ - Train an encoder for the environment. Learning an embedding for the environment would provide a better foundation for further training. This can be done in similar ways that are similar to the methods used to train BERT encoders i.e. Masked State Prediction, Next-State Prediction or Contrastive Learning.
+ - Structured literature research - I have not systematically read through the literature on this topic, there is an abundance of precedence on this topic. The project itself has been to me more of a trying-it-by-myself approach with an emphasis on tinkering rather that actual research and development.
 
 
 ## Requirements
