@@ -1,10 +1,8 @@
 # gym-MagicMan
 
-## Hello
+Magic Man is a Deep Reinforcement Learning Project that I have been working on and off on since maybe as early as 2020.
 
-I am ThomSab and I have been working on and off on a Deep Reinforcement Learning Project for the last five years now.
-
-The idea is very simple. I wanted to code an agent for [Wizard](https://en.wikipedia.org/wiki/Wizard_(card_game)) the card game. If you have never heard of the game before: It is - in a nutshell- a trick-taking card game where you have to announce the amount of tricks that you win each round and gain points if you get this exact amount of tricks but lose points otherwise.
+The approach is straight forward. I want to implement an agent for [Wizard](https://en.wikipedia.org/wiki/Wizard_(card_game)) the card game. If you have never heard of the game before: It is - in a nutshell- a trick-taking card game where you have to predict the amount of tricks that you win each round. Players are rewarded points when they manage to predict the exact amount of tricks but lose points if the prediction is wrong. The goal of the game is therefore not to gain as many tricks as possible as is the case for the majority of trick-taking card games like for example Doppelkopf, but instead to assess the outcome of the game corectly.
 
 I have implemented the game in python as a [gymnasium](https://gymnasium.farama.org/) environment as well as a number of algorithms that I thought would be interesting to try. The current approach is to run the [Stable Baselines 3](https://stable-baselines3.readthedocs.io/en/master/modules/ppo.html) implementation of a [Proximal Policy Optimization Algorithm](https://arxiv.org/abs/1707.06347) and have it play first against randomly acting adversaries and then have it play against other versions of itself. In theory, training would go on until the trained agent surpasses human level of play.
 
