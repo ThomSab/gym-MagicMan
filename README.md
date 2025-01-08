@@ -34,11 +34,21 @@ There is however, a number of things that bear promise in my opinion:
 - sb3-contrib
 
 ## Installation
-Inside gym-MagicMan directory open shell and execute:
 
- " py -m pip install -e . "
- 
-(-editable flag is only necessary if you want to edit the code after install)
+1. Clone the repo
+   ```sh
+   git clone https://github.com/ThomSab/gym-MagicMan.git
+   ```
+2. Install modules
+   ```sh
+   py -m pip install module_name
+   ```
+3. Inside gym-MagicMan directory open shell and execute
+   ```sh
+   py -m pip install -e . 
+   ```
+
+   The editable (-e) flag is only necessary if you want to edit the code after installation.
 
 If you are interested in the code or the project and have trouble installing it I would be happy to help!  Its a good way to make the install guide more inclusive.
  
