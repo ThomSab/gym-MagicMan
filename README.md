@@ -53,6 +53,12 @@ There is however, a number of things that bear promise in my opinion:
 If you are interested in the code or the project and have trouble installing it I would be happy to help!  Its a good way to make the install guide more inclusive.
  
 ## Run
-Execute "MagicMan_env.py" inside
+In ```..\gym-MagicMan\gym_MagicMan\envs\``` execute 
+
+```sh
+py MagicMan_env.py
+```
+
+
  
-..\gym-MagicMan\gym_MagicMan\envs\
+
