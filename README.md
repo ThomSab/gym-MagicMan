@@ -52,8 +52,10 @@ There is however, a number of things that bear promise in my opinion:
 
 If you are interested in the code or the project and have trouble installing it I would be happy to help!  Its a good way to make the install guide more inclusive.
  
-## Run
-In ```..\gym-MagicMan\gym_MagicMan\envs\``` execute 
+## Run a Playable version of the Game
+It possible to play Wizards against the agents in a very minimal interface. Much of the learned behavior of the agents is similar to natural strategies often employed by human players, like taking a trick with a wizard card when a high card of a non-trump suit is played.
+
+To run the interface, go to ```..\gym-MagicMan\gym_MagicMan\envs\``` and execute 
 
 ```sh
 py MagicMan_env.py
