@@ -1,8 +1,10 @@
 # gym-MagicMan
 
-Magic Man is a Deep Reinforcement Learning Project that I have been working on and off on since maybe as early as 2020. Since then the approach has changed a number of times. I have for example applied a genetic algorithm ( Neuro-Evolution of Augmenting Topologies aka. NEAT) to the problem. 
+Magic Man is a Deep Reinforcement Learning Project that I have been working on and off on since maybe as early as 2020. 
 
 The approach is straight forward. I want to implement an agent for [Wizard](https://en.wikipedia.org/wiki/Wizard_(card_game)) the card game. If you have never heard of the game before: It is - in a nutshell- a trick-taking card game where you have to predict the amount of tricks that you win each round. Players are rewarded points when they manage to predict the exact amount of tricks but lose points if the prediction is wrong. The goal of the game is therefore not to gain as many tricks as possible as is the case for the majority of trick-taking card games (like Doppelkopf for example), but instead to assess the outcome of the game correctly.
+
+Since I started out back in 2020, the approach has changed a number of times. I have for example applied a genetic algorithm ( Neuro-Evolution of Augmenting Topologies aka. NEAT) to the problem. As of now, this is by far the most sophisticated and successful iteration of the project.
 
 I have implemented the game in python as a [gymnasium](https://gymnasium.farama.org/) environment as well as a number of algorithms that I thought would be interesting to try. The current approach is to run the [Stable Baselines 3](https://stable-baselines3.readthedocs.io/en/master/modules/ppo.html) implementation of a [Proximal Policy Optimization Algorithm](https://arxiv.org/abs/1707.06347) and have it play first against randomly acting adversaries and then have it play against other versions of itself. Increase in the quality of the agents play slows down over time and is not likely to reach the niveau of skill that is comparable to humans.
 
@@ -52,8 +54,8 @@ There is however, a number of things that bear promise in my opinion:
 
 If you are interested in the code or the project and have trouble installing it I would be happy to help!  Its a good way to make the install guide more inclusive.
  
-## Run a Playable version of the Game
-It possible to play Wizards against the agents in a very minimal interface. Much of the learned behavior of the agents is similar to natural strategies often employed by human players, like taking a trick with a wizard card when a high card of a non-trump suit is played.
+## Run a Playable Version of the Game
+It is possible to play Wizards against the agents in a very minimal interface. Much of the learned behavior of the agents resembles natural strategies often employed by human players, like taking a trick with a wizard card when a high card of a non-trump suit is played.
 
 To run the interface, go to ```..\gym-MagicMan\gym_MagicMan\envs\``` and execute 
 
